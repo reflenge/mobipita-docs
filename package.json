@@ -1,0 +1,31 @@
+{
+  "name": "mobi-pita",
+  "version": "1.0.0",
+  "description": "\"Mobile (moving)\" + \"Pita (fits perfectly/matches)\". We expressed the convenience of being able to \"precisely match the time\" with a detailed reservation system in 10-minute increments, and the peace of mind that the mobile store will \"arrive on time\" at the designated location.",
+  "homepage": "https://reflenge.github.io/Mobi-Pita/docs",
+  "bugs": {
+    "url": "https://github.com/reflenge/Mobi-Pita/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reflenge/Mobi-Pita.git"
+  },
+  "author": "mosunset",
+  "type": "commonjs",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev --parallel --continue",
+    "dev:moc1": "turbo run dev --filter=moc1",
+    "dev:docs": "turbo run dev --filter=docs",
+    "build": "turbo run build --continue",
+    "lint": "turbo run lint"
+  },
+  "packageManager": "pnpm@10.23.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "turbo": "^2.6.1"
+  }
+}

@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B2B2C マルチテナント予約システム (IndexedDB)</title>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel (for JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Dexie.js (IndexedDB Wrapper) -->
+    <script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+
+    <!-- FontAwesome (Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ==========================================
+        // 1. データベース初期化 (IndexedDB via Dexie)
+        // ==========================================
+        const db = new Dexie('B2B2C_Reservation_DB');
+        db.version(1).stores({
+            companies: '++id, name, slug', // 企業
+            shops: '++id, companyId, name, address', // 店舗
+            courses: '++id, shopId, name, price, duration', // コース
+            reservations: '++id, shopId, courseId, customerName, date, status' // 予約
+        });
+
+        // ==========================================
+        // 2. 共通UIコンポーネント
+        // ==========================================
+
+        // --- Toast Notification ---
+        const Toast = ({ message, type = 'info', onClose }) => {
+            useEffect(() => {
+                const timer = setTimeout(onClose, 3000);
+                return () => clearTimeout(timer);
+            }, [onClose]);
+
+            const colors = {
+                info: 'bg-gray-800',
+                success: 'bg-green-600',
+                error: 'bg-red-600'
+            };
+
+            return (
+                <div className={`fixed bottom-4 right-4 ${colors[type]} text-white px-6 py-3 rounded shadow-lg z-50 fade-in flex items-center gap-2`}>
+                    <i className={`fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}`}></i>
+                    {message}
+                </div>
+            );
+        };
+
+        // --- Simple Modal ---
+        const SimpleModal = ({ isOpen, title, children, onClose, actions }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center modal-overlay p-4">
+                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full fade-in overflow-hidden">
+                        <div className="bg-gray-100 px-4 py-3 border-b font-bold flex justify-between items-center">
+                            <span>{title}</span>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">&times;</button>
+                        </div>
+                        <div className="p-4">
+                            {children}
+                        </div>
+                        {actions && (
+                            <div className="px-4 py-3 bg-gray-50 flex justify-end gap-2 border-t">
+                                {actions}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // 3. メインコンポーネント群
+        // ==========================================
+
+        // --- ロール切り替えタブ ---
+        const RoleSwitcher = ({ currentRole, setRole }) => {
+            const roles = [
+                { id: 'platform', label: 'プラットフォーム管理者', icon: 'fa-server', color: 'bg-gray-800' },
+                { id: 'company', label: '企業担当者', icon: 'fa-building', color: 'bg-blue-600' },
+                { id: 'shop', label: '店舗スタッフ', icon: 'fa-store', color: 'bg-green-600' },
+                { id: 'customer', label: 'エンドユーザー(C)', icon: 'fa-user', color: 'bg-orange-500' },
+            ];
+
+            return (
+                <div className="bg-white shadow-md p-4 mb-6">
+                    <h1 className="text-xl font-bold mb-4 text-gray-700">マルチテナントB2B2Cデモ</h1>
+                    <div className="flex flex-wrap gap-2">
+                        {roles.map(role => (
+                            <button
+                                key={role.id}
+                                onClick={() => setRole(role.id)}
+                                className={`px-4 py-2 rounded-lg text-white font-medium transition flex items-center gap-2 ${currentRole === role.id ? role.color : 'bg-gray-300 hover:bg-gray-400'
+                                    }`}
+                            >
+                                <i className={`fas ${role.icon}`}></i>
+                                {role.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- ① プラットフォーム管理画面 ---
+        const PlatformAdminView = ({ showToast }) => {
+            const [companies, setCompanies] = useState([]);
+            const [newName, setNewName] = useState("");
+
+            useEffect(() => { loadCompanies(); }, []);
+            const loadCompanies = async () => { setCompanies(await db.companies.toArray()); };
+
+            const addCompany = async () => {
+                if (!newName) return;
+                await db.companies.add({ name: newName, slug: `comp_${Date.now()}` });
+                setNewName("");
+                loadCompanies();
+                showToast("企業を追加しました", "success");
+            };
+
+            const deleteCompany = async (id) => {
+                await db.companies.delete(id);
+                loadCompanies();
+                showToast("企業を削除しました", "info");
+            };
+
+            return (
+                <div className="p-6 bg-white rounded-lg shadow fade-in border-t-4 border-gray-800">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4"><i className="fas fa-server mr-2"></i>プラットフォーム管理</h2>
+                    <p className="text-gray-500 mb-6">プラットフォームを利用する「企業（テナント）」を管理します。</p>
+
+                    <div className="flex gap-2 mb-6">
+                        <input
+                            type="text"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                            placeholder="新しい企業名を入力 (例: 株式会社A)"
+                            className="border p-2 rounded w-full"
+                        />
+                        <button onClick={addCompany} className="bg-gray-800 text-white px-6 py-2 rounded hover:bg-gray-700">追加</button>
+                    </div>
+
+                    <h3 className="font-bold mb-2">登録企業一覧</h3>
+                    <ul className="space-y-2">
+                        {companies.length === 0 && <li className="text-gray-400">企業が登録されていません</li>}
+                        {companies.map(c => (
+                            <li key={c.id} className="flex justify-between items-center border p-3 rounded bg-gray-50">
+                                <span className="font-medium">{c.name}</span>
+                                <button onClick={() => deleteCompany(c.id)} className="text-red-500 hover:underline text-sm">削除</button>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            );
+        };
+
+        // --- ② 企業担当者画面 ---
+        const CompanyAdminView = ({ showToast }) => {
+            const [companies, setCompanies] = useState([]);
+            const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+            const [shops, setShops] = useState([]);
+            const [courses, setCourses] = useState([]);
+            const [newShopName, setNewShopName] = useState("");
+
+            // コース追加・編集モーダル用State
+            const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
+            const [targetShopId, setTargetShopId] = useState(null);
+            const [courseForm, setCourseForm] = useState({ id: null, name: "", price: "" });
+
+            useEffect(() => {
+                const init = async () => {
+                    const comps = await db.companies.toArray();
+                    setCompanies(comps);
+                    if (comps.length > 0) setSelectedCompanyId(comps[0].id);
+                };
+                init();
+            }, []);
+
+            useEffect(() => {
+                if (selectedCompanyId) loadShops();
+            }, [selectedCompanyId]);
+
+            const loadShops = async () => {
+                const s = await db.shops.where('companyId').equals(Number(selectedCompanyId)).toArray();
+                setShops(s);
+                // Load courses for these shops
+                const sIds = s.map(shop => shop.id);
+                if (sIds.length > 0) {
+                    const c = await db.courses.where('shopId').anyOf(sIds).toArray();
+                    setCourses(c);
+                } else {
+                    setCourses([]);
+                }
+            };
+
+            const addShop = async () => {
+                if (!newShopName || !selectedCompanyId) return;
+                await db.shops.add({
+                    companyId: Number(selectedCompanyId),
+                    name: newShopName,
+                    address: '東京都某所'
+                });
+                setNewShopName("");
+                loadShops();
+                showToast("店舗を追加しました", "success");
+            };
+
+            const openAddCourseModal = (shopId) => {
+                setTargetShopId(shopId);
+                setCourseForm({ id: null, name: "", price: "" });
+                setIsCourseModalOpen(true);
+            };
+
+            const openEditCourseModal = (course) => {
+                setTargetShopId(course.shopId);
+                setCourseForm({ id: course.id, name: course.name, price: course.price });
+                setIsCourseModalOpen(true);
+            };
+
+            const deleteCourse = async (courseId) => {
+                if (confirm("本当にこのコースを削除しますか？")) {
+                    await db.courses.delete(courseId);
+                    loadShops();
+                    showToast("コースを削除しました", "info");
+                }
+            };
+
+            const saveCourse = async () => {
+                if (courseForm.name && courseForm.price) {
+                    if (courseForm.id) {
+                        await db.courses.update(courseForm.id, {
+                            name: courseForm.name,
+                            price: Number(courseForm.price)
+                        });
+                        showToast("コースを更新しました", "success");
+                    } else {
+                        await db.courses.add({
+                            shopId: targetShopId,
+                            name: courseForm.name,
+                            price: Number(courseForm.price),
+                            duration: 60
+                        });
+                        showToast("コースを追加しました", "success");
+                    }
+                    setIsCourseModalOpen(false);
+                    loadShops();
+                } else {
+                    showToast("全ての項目を入力してください", "error");
+                }
+            };
+
+            return (
+                <div className="p-6 bg-white rounded-lg shadow fade-in border-t-4 border-blue-600">
+                    <h2 className="text-2xl font-bold text-blue-800 mb-4"><i className="fas fa-building mr-2"></i>企業管理 (テナント)</h2>
+                    <p className="text-gray-500 mb-6">自社店舗の追加やメニュー設定を行います。</p>
+
+                    {companies.length === 0 ? (
+                        <div className="text-red-500">先にプラットフォーム管理画面で企業を作成してください。</div>
+                    ) : (
+                        <>
+                            <div className="mb-6">
+                                <label className="block text-sm font-bold mb-1">操作する企業を選択 (ログイン中の企業と仮定)</label>
+                                <select
+                                    value={selectedCompanyId || ''}
+                                    onChange={(e) => setSelectedCompanyId(e.target.value)}
+                                    className="border p-2 rounded w-full bg-blue-50"
+                                >
+                                    {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="border-t pt-4">
+                                <h3 className="font-bold mb-2">店舗管理</h3>
+                                <div className="flex gap-2 mb-4">
+                                    <input
+                                        type="text"
+                                        value={newShopName}
+                                        onChange={(e) => setNewShopName(e.target.value)}
+                                        placeholder="新しい店舗名 (例: 渋谷店)"
+                                        className="border p-2 rounded w-full"
+                                    />
+                                    <button onClick={addShop} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-500">店舗追加</button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {shops.map(shop => (
+                                        <div key={shop.id} className="border p-4 rounded shadow-sm hover:shadow-md transition">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <h4 className="font-bold text-lg text-blue-700">{shop.name}</h4>
+                                                    <p className="text-xs text-gray-500">ID: {shop.id}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => openAddCourseModal(shop.id)}
+                                                    className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200"
+                                                >
+                                                    + コース追加
+                                                </button>
+                                            </div>
+
+                                            <div className="mt-3 space-y-2">
+                                                {courses.filter(c => c.shopId === shop.id).map(course => (
+                                                    <div key={course.id} className="flex justify-between items-center bg-gray-50 p-2 rounded text-sm">
+                                                        <span>{course.name} (¥{course.price})</span>
+                                                        <div className="flex gap-1">
+                                                            <button onClick={() => openEditCourseModal(course)} className="text-blue-500 hover:text-blue-700 px-1">
+                                                                <i className="fas fa-edit"></i>
+                                                            </button>
+                                                            <button onClick={() => deleteCourse(course.id)} className="text-red-500 hover:text-red-700 px-1">
+                                                                <i className="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {courses.filter(c => c.shopId === shop.id).length === 0 && (
+                                                    <p className="text-xs text-gray-400">コース未登録</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {/* コース追加・編集モーダル */}
+                    <SimpleModal
+                        isOpen={isCourseModalOpen}
+                        title={courseForm.id ? "コースの編集" : "コースの追加"}
+                        onClose={() => setIsCourseModalOpen(false)}
+                        actions={
+                            <>
+                                <button onClick={() => setIsCourseModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">キャンセル</button>
+                                <button onClick={saveCourse} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">保存</button>
+                            </>
+                        }
+                    >
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold mb-1">コース名</label>
+                                <input
+                                    type="text"
+                                    className="w-full border p-2 rounded"
+                                    value={courseForm.name}
+                                    onChange={e => setCourseForm({ ...courseForm, name: e.target.value })}
+                                    placeholder="例: ランチコース"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold mb-1">価格 (円)</label>
+                                <input
+                                    type="number"
+                                    className="w-full border p-2 rounded"
+                                    value={courseForm.price}
+                                    onChange={e => setCourseForm({ ...courseForm, price: e.target.value })}
+                                    placeholder="3000"
+                                />
+                            </div>
+                        </div>
+                    </SimpleModal>
+                </div>
+            );
+        };
+
+        // --- ③ 店舗スタッフ画面 ---
+        const ShopStaffView = ({ showToast }) => {
+            const [companies, setCompanies] = useState([]);
+            const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+            const [shops, setShops] = useState([]);
+            const [selectedShopId, setSelectedShopId] = useState(null);
+            const [reservations, setReservations] = useState([]);
+
+            useEffect(() => {
+                const init = async () => {
+                    const comps = await db.companies.toArray();
+                    setCompanies(comps);
+                    if (comps.length > 0) setSelectedCompanyId(comps[0].id);
+                };
+                init();
+            }, []);
+
+            useEffect(() => {
+                if (selectedCompanyId) {
+                    db.shops.where('companyId').equals(Number(selectedCompanyId)).toArray().then(s => {
+                        setShops(s);
+                        if (s.length > 0) {
+                            setSelectedShopId(s[0].id);
+                        } else {
+                            setSelectedShopId(null);
+                            setReservations([]);
+                        }
+                    });
+                }
+            }, [selectedCompanyId]);
+
+            useEffect(() => {
+                if (selectedShopId) loadReservations();
+            }, [selectedShopId]);
+
+            const loadReservations = async () => {
+                const resData = await db.reservations
+                    .where('shopId')
+                    .equals(Number(selectedShopId))
+                    .reverse()
+                    .toArray();
+
+                const enhancedResData = await Promise.all(resData.map(async (r) => {
+                    const course = await db.courses.get(r.courseId);
+                    return { ...r, courseName: course ? course.name : '不明なコース' };
+                }));
+
+                setReservations(enhancedResData);
+            };
+
+            const updateStatus = async (id, status) => {
+                await db.reservations.update(id, { status });
+                loadReservations();
+                showToast(`予約ステータスを更新しました: ${status}`, "info");
+            };
+
+            return (
+                <div className="p-6 bg-white rounded-lg shadow fade-in border-t-4 border-green-600">
+                    <h2 className="text-2xl font-bold text-green-800 mb-4"><i className="fas fa-store mr-2"></i>店舗スタッフ (予約台帳)</h2>
+
+                    {companies.length === 0 ? (
+                        <div className="text-gray-500">企業データがありません。プラットフォーム管理画面で作成してください。</div>
+                    ) : (
+                        <>
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-1">企業選択</label>
+                                <select
+                                    value={selectedCompanyId || ''}
+                                    onChange={(e) => setSelectedCompanyId(e.target.value)}
+                                    className="border p-2 rounded w-full bg-green-50"
+                                >
+                                    {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                            </div>
+
+                            {shops.length === 0 ? (
+                                <div className="text-gray-500">この企業には店舗が登録されていません。企業管理画面で作成してください。</div>
+                            ) : (
+                                <>
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-bold mb-1">店舗選択</label>
+                                        <select
+                                            value={selectedShopId || ''}
+                                            onChange={(e) => setSelectedShopId(e.target.value)}
+                                            className="border p-2 rounded w-full bg-green-50"
+                                        >
+                                            {shops.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                        </select>
+                                    </div>
+
+                                    <h3 className="font-bold mb-2">予約リスト</h3>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr className="bg-green-100 text-green-800">
+                                                    <th className="p-2 border-b">日時</th>
+                                                    <th className="p-2 border-b">お客様名</th>
+                                                    <th className="p-2 border-b">コース</th>
+                                                    <th className="p-2 border-b">ステータス</th>
+                                                    <th className="p-2 border-b">操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {reservations.length === 0 && (
+                                                    <tr><td colSpan="5" className="p-4 text-center text-gray-400">予約はまだありません</td></tr>
+                                                )}
+                                                {reservations.map(r => (
+                                                    <tr key={r.id} className="border-b hover:bg-gray-50">
+                                                        <td className="p-2">{new Date(r.date).toLocaleString()}</td>
+                                                        <td className="p-2 font-bold">{r.customerName}</td>
+                                                        <td className="p-2 text-sm">{r.courseName}</td>
+                                                        <td className="p-2">
+                                                            <span className={`px-2 py-1 rounded text-xs text-white ${r.status === 'confirmed' ? 'bg-blue-500' :
+                                                                    r.status === 'cancelled' ? 'bg-red-500' : 'bg-gray-500'
+                                                                }`}>
+                                                                {r.status === 'confirmed' ? '確定' : r.status === 'cancelled' ? 'キャンセル' : '未定'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="p-2">
+                                                            {r.status !== 'cancelled' && (
+                                                                <button onClick={() => updateStatus(r.id, 'cancelled')} className="text-red-500 text-sm hover:underline">
+                                                                    キャンセル
+                                                                </button>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </>
+                            )}
+                        </>
+                    )}
+                </div>
+            );
+        };
+
+        // --- ④ エンドユーザー予約画面 ---
+        const CustomerView = ({ showToast }) => {
+            const [step, setStep] = useState(0);
+
+            const [companies, setCompanies] = useState([]);
+            const [shops, setShops] = useState([]);
+            const [courses, setCourses] = useState([]);
+
+            const [selectedCompany, setSelectedCompany] = useState(null);
+            const [selectedShop, setSelectedShop] = useState(null);
+            const [selectedCourse, setSelectedCourse] = useState(null);
+
+            const [formName, setFormName] = useState("");
+            const [formDate, setFormDate] = useState("");
+
+            useEffect(() => {
+                const loadData = async () => { setCompanies(await db.companies.toArray()); };
+                loadData();
+            }, []);
+
+            const handleCompanySelect = async (comp) => {
+                setSelectedCompany(comp);
+                setShops(await db.shops.where('companyId').equals(comp.id).toArray());
+                setStep(1);
+            };
+
+            const handleShopSelect = async (shop) => {
+                setSelectedShop(shop);
+                setCourses(await db.courses.where('shopId').equals(shop.id).toArray());
+                setStep(2);
+            };
+
+            const handleCourseSelect = (course) => {
+                setSelectedCourse(course);
+                setStep(3);
+            };
+
+            const handleSubmit = async () => {
+                if (!formName || !formDate) {
+                    showToast("必須項目を入力してください", "error");
+                    return;
+                }
+
+                await db.reservations.add({
+                    shopId: selectedShop.id,
+                    courseId: selectedCourse.id,
+                    customerName: formName,
+                    date: formDate,
+                    status: 'confirmed'
+                });
+
+                showToast("予約が完了しました！お待ちしております。", "success");
+                setStep(0);
+                setFormName("");
+                setFormDate("");
+                setSelectedCompany(null);
+            };
+
+            return (
+                <div className="p-6 bg-white rounded-lg shadow fade-in border-t-4 border-orange-500">
+                    <h2 className="text-2xl font-bold text-orange-600 mb-6"><i className="fas fa-utensils mr-2"></i>レストラン予約 (Customer)</h2>
+
+                    {/* Step 0: 企業選択 */}
+                    {step === 0 && (
+                        <div className="fade-in">
+                            <h3 className="text-lg font-bold mb-4">お店のグループを選んでください</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {companies.map(c => (
+                                    <button key={c.id} onClick={() => handleCompanySelect(c)} className="p-6 border rounded-lg hover:shadow-lg hover:bg-orange-50 transition text-left">
+                                        <div className="font-bold text-xl mb-2">{c.name}</div>
+                                        <div className="text-gray-400 text-sm">グループID: {c.slug}</div>
+                                    </button>
+                                ))}
+                                {companies.length === 0 && <p className="text-gray-500">予約可能な店舗グループがありません。</p>}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 1: 店舗選択 */}
+                    {step === 1 && (
+                        <div className="fade-in">
+                            <button onClick={() => setStep(0)} className="text-sm text-gray-500 mb-4">&lt; 戻る</button>
+                            <h3 className="text-lg font-bold mb-4"><span className="text-orange-600">{selectedCompany.name}</span> の店舗一覧</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {shops.map(s => (
+                                    <button key={s.id} onClick={() => handleShopSelect(s)} className="p-6 border rounded-lg hover:shadow-lg hover:bg-orange-50 transition text-left">
+                                        <div className="font-bold text-xl mb-2">{s.name}</div>
+                                        <div className="text-gray-500 text-sm"><i className="fas fa-map-marker-alt"></i> {s.address}</div>
+                                    </button>
+                                ))}
+                                {shops.length === 0 && <p className="text-gray-500">このグループには店舗が登録されていません。</p>}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 2: コース選択 */}
+                    {step === 2 && (
+                        <div className="fade-in">
+                            <button onClick={() => setStep(1)} className="text-sm text-gray-500 mb-4">&lt; 戻る</button>
+                            <h3 className="text-lg font-bold mb-4"><span className="text-orange-600">{selectedShop.name}</span> のコース選択</h3>
+                            <div className="space-y-4">
+                                {courses.map(course => (
+                                    <div key={course.id} className="border p-4 rounded-lg flex justify-between items-center hover:bg-gray-50">
+                                        <div>
+                                            <div className="font-bold text-lg">{course.name}</div>
+                                            <div className="text-gray-500 text-sm">所要時間: {course.duration}分</div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="font-bold text-xl text-orange-600">¥{course.price.toLocaleString()}</div>
+                                            <button onClick={() => handleCourseSelect(course)} className="mt-2 bg-orange-500 text-white px-4 py-2 rounded shadow hover:bg-orange-600">
+                                                このコースで予約
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {courses.length === 0 && <p className="text-gray-500">現在提供されているコースはありません。</p>}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 3: 情報入力 */}
+                    {step === 3 && (
+                        <div className="fade-in max-w-lg mx-auto border p-6 rounded-lg bg-gray-50">
+                            <button onClick={() => setStep(2)} className="text-sm text-gray-500 mb-4">&lt; コース選択に戻る</button>
+                            <h3 className="text-xl font-bold mb-6 text-center">予約情報の入力</h3>
+
+                            <div className="mb-4 p-4 bg-white rounded border">
+                                <div className="text-sm text-gray-500">店舗</div>
+                                <div className="font-bold mb-2">{selectedShop.name}</div>
+                                <div className="text-sm text-gray-500">コース</div>
+                                <div className="font-bold">{selectedCourse.name} (¥{selectedCourse.price.toLocaleString()})</div>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-1">お名前</label>
+                                <input
+                                    type="text"
+                                    className="w-full border p-3 rounded"
+                                    placeholder="山田 太郎"
+                                    value={formName}
+                                    onChange={(e) => setFormName(e.target.value)}
+                                />
+                            </div>
+                            <div className="mb-6">
+                                <label className="block text-sm font-bold mb-1">来店日時</label>
+                                <input
+                                    type="datetime-local"
+                                    className="w-full border p-3 rounded"
+                                    value={formDate}
+                                    onChange={(e) => setFormDate(e.target.value)}
+                                />
+                            </div>
+
+                            <button onClick={handleSubmit} className="w-full bg-orange-600 text-white font-bold py-3 rounded-lg shadow hover:bg-orange-700 transition">
+                                予約を確定する
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            const [currentRole, setRole] = useState('platform');
+            const [toast, setToast] = useState(null); // { message, type }
+            const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+
+            const showToast = (message, type = 'info') => {
+                setToast({ message, type });
+            };
+
+            // デバッグ用初期データ投入ボタン
+            const handleInitClick = () => {
+                setIsResetConfirmOpen(true);
+            };
+
+            const executeInitData = async () => {
+                await db.transaction('rw', db.companies, db.shops, db.courses, db.reservations, async () => {
+                    // 既存データを全削除
+                    await db.companies.clear();
+                    await db.shops.clear();
+                    await db.courses.clear();
+                    await db.reservations.clear();
+
+                    // 1. 企業作成 (3社)
+                    const cId1 = await db.companies.add({ name: '株式会社グルメイノベーション', slug: 'gourmet' });
+                    const cId2 = await db.companies.add({ name: 'ビューティーサロン・グループ', slug: 'beauty' });
+                    const cId3 = await db.companies.add({ name: 'レンタルスペース運営事務局', slug: 'space' });
+
+                    // --- Company 1: グルメ (3店舗) ---
+                    const sId1_1 = await db.shops.add({ companyId: cId1, name: 'ビストロ・ボン 丸の内', address: '東京都千代田区' });
+                    const sId1_2 = await db.shops.add({ companyId: cId1, name: '焼肉 虎ノ門', address: '東京都港区' });
+                    const sId1_3 = await db.shops.add({ companyId: cId1, name: 'カフェ・ド・シエル', address: '東京都中央区' });
+
+                    // Courses for Shop 1-1
+                    const coId1_1_1 = await db.courses.add({ shopId: sId1_1, name: 'ウィークデーランチ', price: 1200, duration: 60 });
+                    const coId1_1_2 = await db.courses.add({ shopId: sId1_1, name: '季節のディナーコース', price: 5000, duration: 120 });
+                    await db.courses.add({ shopId: sId1_1, name: '【個室確約】アニバーサリープラン', price: 8000, duration: 150 });
+                    // Courses for Shop 1-2
+                    await db.courses.add({ shopId: sId1_2, name: '食べ放題「極」', price: 4500, duration: 90 });
+                    await db.courses.add({ shopId: sId1_2, name: '特選和牛ランチ', price: 2500, duration: 60 });
+                    // Courses for Shop 1-3
+                    await db.courses.add({ shopId: sId1_3, name: 'ケーキセット', price: 1100, duration: 60 });
+                    await db.courses.add({ shopId: sId1_3, name: 'アフタヌーンティー', price: 3500, duration: 120 });
+
+                    // --- Company 2: ビューティー (3店舗) ---
+                    const sId2_1 = await db.shops.add({ companyId: cId2, name: 'Hair Salon Aoyama', address: '東京都港区' });
+                    const sId2_2 = await db.shops.add({ companyId: cId2, name: 'Relax Spa Ebisu', address: '東京都渋谷区' });
+                    const sId2_3 = await db.shops.add({ companyId: cId2, name: 'Nail Studio Roppongi', address: '東京都港区' });
+
+                    // Courses for Shop 2-1
+                    await db.courses.add({ shopId: sId2_1, name: 'カット＋カラー', price: 12000, duration: 120 });
+                    await db.courses.add({ shopId: sId2_1, name: 'ヘッドスパ', price: 6000, duration: 60 });
+                    // Courses for Shop 2-2
+                    await db.courses.add({ shopId: sId2_2, name: '全身アロマ 60分', price: 8000, duration: 60 });
+                    await db.courses.add({ shopId: sId2_2, name: '岩盤浴セット', price: 2500, duration: 180 });
+                    // Courses for Shop 2-3
+                    await db.courses.add({ shopId: sId2_3, name: 'ジェルネイル', price: 6000, duration: 90 });
+
+                    // --- Company 3: スペース (3店舗) ---
+                    const sId3_1 = await db.shops.add({ companyId: cId3, name: '渋谷カンファレンスセンター', address: '東京都渋谷区' });
+                    const sId3_2 = await db.shops.add({ companyId: cId3, name: '品川ミーティングルーム', address: '東京都港区' });
+                    const sId3_3 = await db.shops.add({ companyId: cId3, name: 'コワーキングスペース新宿', address: '東京都新宿区' });
+
+                    // Courses for Shop 3-1
+                    const coId3_1_1 = await db.courses.add({ shopId: sId3_1, name: '大会議室A (1時間)', price: 10000, duration: 60 });
+                    const coId3_1_2 = await db.courses.add({ shopId: sId3_1, name: '小会議室B (1時間)', price: 3000, duration: 60 });
+                    // Courses for Shop 3-3
+                    await db.courses.add({ shopId: sId3_3, name: 'ドロップイン利用(1日)', price: 2000, duration: 600 });
+
+                    // --- 予約データ (サンプル) ---
+                    // 過去の予約
+                    await db.reservations.add({ shopId: sId1_1, courseId: coId1_1_1, customerName: '山田 太郎', date: '2023-10-01T12:00', status: 'confirmed' });
+                    // 未来の予約
+                    await db.reservations.add({ shopId: sId1_1, courseId: coId1_1_2, customerName: '鈴木 花子', date: '2025-12-24T18:00', status: 'confirmed' });
+                    await db.reservations.add({ shopId: sId1_1, courseId: coId1_1_2, customerName: '佐藤 健', date: '2025-12-25T19:00', status: 'confirmed' });
+
+                    // キャンセル済み
+                    await db.reservations.add({ shopId: sId3_1, courseId: coId3_1_1, customerName: 'テック株式会社', date: '2025-11-20T10:00', status: 'cancelled' });
+                    await db.reservations.add({ shopId: sId3_1, courseId: coId3_1_2, customerName: '個人利用（高橋）', date: '2025-11-21T14:00', status: 'confirmed' });
+                });
+
+                setIsResetConfirmOpen(false);
+                showToast("サンプルデータを再投入しました。画面をリロードします...", "success");
+                setTimeout(() => window.location.reload(), 1500);
+            };
+
+            return (
+                <div className="container mx-auto p-4 max-w-4xl">
+                    <RoleSwitcher currentRole={currentRole} setRole={setRole} />
+
+                    {currentRole === 'platform' && <PlatformAdminView showToast={showToast} />}
+                    {currentRole === 'company' && <CompanyAdminView showToast={showToast} />}
+                    {currentRole === 'shop' && <ShopStaffView showToast={showToast} />}
+                    {currentRole === 'customer' && <CustomerView showToast={showToast} />}
+
+                    {/* Toast Container */}
+                    {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+                    {/* Reset Confirmation Modal */}
+                    <SimpleModal
+                        isOpen={isResetConfirmOpen}
+                        title="データの初期化"
+                        onClose={() => setIsResetConfirmOpen(false)}
+                        actions={
+                            <>
+                                <button onClick={() => setIsResetConfirmOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">キャンセル</button>
+                                <button onClick={executeInitData} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">実行する</button>
+                            </>
+                        }
+                    >
+                        <p className="text-gray-700">
+                            既存のデータを全て削除し、3社分の詳細なテストデータを再投入します。<br />
+                            よろしいですか？
+                        </p>
+                    </SimpleModal>
+
+                    <div className="mt-12 text-center border-t pt-4">
+                        <button onClick={handleInitClick} className="text-xs text-blue-500 hover:text-blue-700 underline font-bold">
+                            デバッグ: テストデータを投入する (3社×3店舗など)
+                        </button>
+                        <p className="text-xs text-gray-400 mt-2">
+                            ※このアプリはIndexedDBを使用しています。データはブラウザ内に保存されます。
+                        </p>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
