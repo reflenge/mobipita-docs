@@ -1,16 +1,16 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
-template: splash # Remove or comment out this line to display the site sidebar on this page.
+title: Starlightへようこそ
+description: Starlightでドキュメントサイトの構築を始めましょう。
+template: splash # この行を削除またはコメントアウトすると、このページにサイトのサイドバーが表示されます。
 hero:
-  tagline: Congrats on setting up a new Starlight project!
+  tagline: 新しいStarlightプロジェクトのセットアップおめでとうございます！
   image:
     file: ../../assets/houston.webp
   actions:
-    - text: Example Guide
-      link: /guides/example/
+    - text: 例のガイド
+      link: /mobi-pita/docs/guides/example/
       icon: right-arrow
-    - text: Read the Starlight docs
+    - text: Starlightのドキュメントを読む
       link: https://starlight.astro.build
       icon: external
       variant: minimal
@@ -18,23 +18,23 @@ hero:
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+## 次のステップ
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
+	<Card title="コンテンツを更新する" icon="pencil">
+		`src/content/docs/index.mdx` を編集して、このページが変更されるのを確認してください。
 	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
+	<Card title="ページレイアウトを変更する" icon="document">
+		`src/content/docs/index.mdx` の `template: splash` を削除すると、このページに
+		サイドバーが表示されます。
 	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
+	<Card title="新しいコンテンツを追加する" icon="add-document">
+		`src/content/docs` にMarkdownまたはMDXファイルを追加して、新しいページを作成します。
 	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
+	<Card title="サイトを設定する" icon="setting">
+		`astro.config.mjs` で `sidebar` とその他の設定を編集します。
 	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+	<Card title="ドキュメントを読む" icon="open-book">
+		[Starlightのドキュメント](https://starlight.astro.build/)で詳細を学びましょう。
 	</Card>
 </CardGrid>

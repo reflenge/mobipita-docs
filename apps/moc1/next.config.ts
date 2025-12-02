@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
-  basePath: "/Mobi-Pita/moc1",
+  basePath: "/mobi-pita/moc1",
   output: "export",
 };
 
