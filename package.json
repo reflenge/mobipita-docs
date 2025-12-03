@@ -1,14 +1,14 @@
 {
-  "name": "mobi-pita",
+  "name": "mobipita",
   "version": "1.0.0",
   "description": "\"Mobile (moving)\" + \"Pita (fits perfectly/matches)\". We expressed the convenience of being able to \"precisely match the time\" with a detailed reservation system in 10-minute increments, and the peace of mind that the mobile store will \"arrive on time\" at the designated location.",
-  "homepage": "https://reflenge.github.io/mobi-pita/docs",
+  "homepage": "https://reflenge.github.io/mobipita/docs",
   "bugs": {
-    "url": "https://github.com/reflenge/mobi-pita/issues"
+    "url": "https://github.com/reflenge/mobipita/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/reflenge/mobi-pita.git"
+    "url": "git+https://github.com/reflenge/mobipita.git"
   },
   "author": "mosunset",
   "type": "commonjs",
