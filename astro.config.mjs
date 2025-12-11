@@ -89,10 +89,6 @@ export default defineConfig({
                             label: "アプリケーション構成",
                             slug: "meetings/app-architecture",
                         },
-                        {
-                            label: "ミーティングノート",
-                            slug: "meetings/meeting-notes",
-                        },
                     ],
                 },
                 {
