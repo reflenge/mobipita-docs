@@ -1,8 +1,8 @@
 ---
-title: StripeConnectについて
-description: 「RootTenant / Tenant / Location」モデルに、Stripe Connect をどうかぶせるか
+title: Stripe Connect
+description: 「RootTenant / Tenant / Location」モデルに、Stripe Connect をどう適用するか
 sidebar:
-  order: 2
+  order: 3
 ---
 
 :::caution[作業中]
@@ -178,25 +178,7 @@ RootTenant（本部C） … Connected Account
 
 ---
 
-## Express Account と Custom Account の選択
-
-運営者や本部にどこまで Stripe の画面を提供するかで選択が決まります：
-
-* **Express アカウント**
-
-  * Stripe が KYC・ダッシュボードを提供し、
-    プラットフォーム側は「お金の流れとブランド」を制御する ([Stripe ドキュメント][4])
-  * オーナー側は「Stripeの簡易ダッシュボード」で売上や入金を確認できる
-* **Custom アカウント**
-
-  * オンボーディング、管理画面、レポートをすべてプラットフォーム側で実装する代わりに
-    コントロールは最大、責任も最大 ([Stripe ドキュメント][5])
-
-Connect の対象は **本部・運営者（法人）** であり、
-UI 的には以下のように分けられます：
-
-* 本部・運営者：Express or Custom（事業者向け）
-* 顧客：通常の Checkout / PaymentElement のみ（Connect のアカウントにはならない）
+詳細は[Express Account と Custom Account の選択](/architecture/Stripe/account-types)を参照してください。
 
 ---
 
@@ -238,5 +220,3 @@ RootTenant / Tenant / Location モデルと Stripe Connect を組み合わせる
 [1]: https://stripe.com/en-jp/connect?utm_source=chatgpt.com "Stripe Connect | Platform and Marketplace Payment ..."
 [2]: https://docs.stripe.com/connect/separate-charges-and-transfers?utm_source=chatgpt.com "Create separate charges and transfers"
 [3]: https://docs.stripe.com/connect?utm_source=chatgpt.com "Platforms and marketplaces with Stripe Connect"
-[4]: https://docs.stripe.com/connect/express-accounts?utm_source=chatgpt.com "Using Connect with Express connected accounts"
-[5]: https://docs.stripe.com/connect/custom-accounts?utm_source=chatgpt.com "Using Connect with Custom connected accounts"

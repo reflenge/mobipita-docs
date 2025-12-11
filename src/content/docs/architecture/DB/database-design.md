@@ -2,7 +2,7 @@
 title: マルチテナントのDB設計について
 description: RLS と Schema分離の違い
 sidebar:
-  order: 3
+  order: 6
 ---
 
 :::caution[作業中]
@@ -95,13 +95,15 @@ sidebar:
 
 こうすることで、`SELECT * FROM orders WHERE tenant_id = 't_A'` とすれば、株式会社Aの注文だけが取得できます。
 
-### データベース選定
+---
 
-PostgreSQL/Supabase, MySQL, DynamoDBなど、選択するデータベースによって、**「どうやって他社のデータが見えないようにガードするか（RLSの実装方法など）」**の具体的な実装方法が変わります。
+## PostgreSQLにおける実装パターン
 
-PostgreSQLを採用する場合、現代のマルチテナント開発のデファクトスタンダード（事実上の標準）は、\*\*「Row Level Security (RLS) を使ったプールモデル」\*\*です。
+PostgreSQLを採用する場合、現代のマルチテナント開発のデファクトスタンダード（事実上の標準）は、**「Row Level Security (RLS) を使ったプールモデル」**です。
 
 これは、PostgreSQLがデータベースエンジンレベルで持っている強力なセキュリティ機能を利用する方法で、アプリケーションのコード（WHERE句）でのバグによるデータ漏洩を「強制的に」防ぐことができます。
+
+データベース選定の詳細は[データベース選定](/architecture/database-selection)を参照してください。
 
 以下に、PostgreSQLにおける概念、RLSの仕組み、そしてもう一つの選択肢であるスキーマ分離について解説します。
 
@@ -186,148 +188,15 @@ PostgreSQL特有の機能である「Schema（名前空間）」を利用して�
   * 「A社専用のデータを丸ごとバックアップして渡してほしい」という要望が頻繁にある場合。
   * テナントごとにテーブル構造そのものを変える必要がある場合（極めて稀）。
 
-### ORMの選定
+---
+
+## ORMとの連携
 
 PostgreSQLを操作するために、**ORM（Object-Relational Mapping）**の選定が必要です。
-（例: **Prisma, Drizzle ORM, TypeORM**, または素のSQLなど）
 
 選択するORMによって、RLSやテナント分離をコード上でどう実装するかが変わります。
 
-Drizzle ORM でマルチテナント（PostgreSQL）を実装する場合、大きく分けて**2つのアプローチ**があります。
-
-RLS（DBレベルのセキュリティ）が推奨される一方で、**DrizzleのようなモダンなORMと標準的なPostgreSQL（Supabase以外）を組み合わせる場合、「アプリ側で制御する（WHERE句）」方が実装が簡単で一般的**です。
-
-それぞれの実装パターンと、具体的なコード例を以下に示します。
-
------
-
-### 1\. アプローチA：アプリ側で制御（最も一般的・簡単）
-
-DBにRLSを設定せず、Drizzleのクエリを書くたびに**必ず `where` でテナントIDを指定する**方法です。
-
-  * **メリット:** 構成が単純。コネクションプールの管理（後述）を気にしなくて良い。
-  * **デメリット:** `where` を書き忘れると他社のデータが見えてしまう（開発者の責任）。
-
-#### Step 1: スキーマ定義 (`schema.ts`)
-
-まず、再利用可能な `tenantId` の定義を作っておくのがベストプラクティスです。
-
-```typescript
-import { pgTable, serial, text, uuid, timestamp } from 'drizzle-orm/pg-core';
-
-// 全テーブル共通の「テナントIDカラム」の定義
-const tenantIdColumn = uuid('tenant_id').notNull();
-
-// テナントテーブル
-export const tenants = pgTable('tenants', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  name: text('name').notNull(),
-});
-
-// 商品テーブル（テナントIDを持つ）
-export const products = pgTable('products', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull(),
-  // ここでテナントIDを使用
-  tenantId: tenantIdColumn.references(() => tenants.id),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-```
-
-#### Step 2: クエリの実装
-
-Drizzleの `where` 句で、常に `tenantId` を絞り込みます。
-
-```typescript
-import { eq, and } from 'drizzle-orm';
-import { db } from './db';
-import { products } from './schema';
-
-// 例: APIルート内での処理
-async function getProducts(currentTenantId: string) {
-  return await db
-    .select()
-    .from(products)
-    // ★重要: ここで必ずテナントIDを絞り込む
-    .where(eq(products.tenantId, currentTenantId));
-}
-
-async function updateProduct(currentTenantId: string, productId: number, newData: any) {
-  return await db
-    .update(products)
-    .set(newData)
-    // ★重要: 更新時も必ず「自分のテナント かつ その商品」であることを確認
-    .where(
-      and(
-        eq(products.id, productId),
-        eq(products.tenantId, currentTenantId)
-      )
-    );
-}
-```
-
------
-
-### 2\. アプローチB：RLSを利用（堅牢だが実装難易度・高）
-
-PostgreSQLの強力なセキュリティ機能（RLS）を使い、**Drizzle側で `where` を書き忘れてもデータが出ないようにする**構成です。
-
-**⚠️ 注意点:** Node.jsなどのサーバー環境では「コネクションプール（DB接続の使い回し）」を使用するため、単純に `SET app.current_tenant` を実行すると、**次の無関係なリクエストにテナントID設定が残ってしまう事故**が起きやすいです。これを防ぐために、必ず「トランザクション」内で処理を行う必要があります。
-
-#### Step 1: SQLでのRLS設定（マイグレーション）
-
-Drizzleの `sql` フォルダに手動でSQLを作成するか、マイグレーションファイルに直接記述します。
-
-```sql
--- RLS有効化
-ALTER TABLE products ENABLE ROW LEVEL SECURITY;
-
--- ポリシー作成: 'app.current_tenant' という設定値と一致するものだけ許可
-CREATE POLICY tenant_isolation ON products
-USING (tenant_id = current_setting('app.current_tenant')::uuid);
-```
-
-#### Step 2: Drizzleでのクエリ実装（トランザクション必須）
-
-Drizzleでクエリを投げる際は、**必ずトランザクションを開き、その中で「変数のセット」と「クエリ」をセットで実行**します。
-
-```typescript
-import { sql } from 'drizzle-orm';
-import { db } from './db';
-import { products } from './schema';
-
-async function getProductsSecurely(currentTenantId: string) {
-  // トランザクションを使うことで、このブロック内だけの「設定」にする
-  return await db.transaction(async (tx) => {
-
-    // 1. セッション変数にテナントIDをセット（重要: LOCALをつける）
-    await tx.execute(sql`SELECT set_config('app.current_tenant', ${currentTenantId}, true)`);
-
-    // 2. 普通にクエリを実行（WHERE句を書かなくても絞り込まれる！）
-    return await tx.select().from(products);
-
-  });
-}
-```
-
-### 3\. どちらを選ぶべきか？
-
-開発フェーズやチームの習熟度に合わせて選択します。
-
-  * **アプローチA（アプリ制御）が推奨される場合:**
-
-      * ほとんどのWebアプリ開発で十分
-      * コードが読みやすく、デバッグもしやすい
-      * 「Drizzleで `where` を書き忘れる」リスクは、コードレビューや、必ず `tenantId` を要求する\*\*ラッパー関数（Repositoryパターン）\*\*を作ることで防止可能
-
-  * **アプローチB（RLS）が推奨される場合:**
-
-      * Supabaseを使う場合（Supabase SDKが自動で処理）
-      * 金融系など、セキュリティ要件が極めて高く「万が一の実装ミスも許されない」場合
-
-### APIフレームワークの選定
-
-**APIのフレームワーク**の選定（例: Next.js の Server Actions / API Routes, Hono, Express など）により、「どうやってリクエストから安全に `tenantId` を取り出してDrizzleに渡すか（Middlewareの設計）」の具体的な実装方法が変わります。
+詳細は[ORM選定](/architecture/orm-selection)を参照してください。
 
 :::tip[実装前の検討事項]
 以下の点は実装前に確定する必要があります：
