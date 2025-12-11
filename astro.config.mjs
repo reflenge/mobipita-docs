@@ -11,8 +11,7 @@ import rehypeKatex from 'rehype-katex';
 
 // https://astro.build/config
 export default defineConfig({
-    site: "https://reflenge.github.io",
-    base: "/mobipita/docs",
+    site: "https://mobipita.reflenge.workers.dev",
     markdown: {
         remarkPlugins: [remarkMath],
         rehypePlugins: [[rehypeKatex, { strict: true }]],
@@ -58,11 +57,6 @@ export default defineConfig({
                     label: "GitHub",
                     icon: "github",
                     href: "https://github.com/reflenge/mobipita",
-                },
-                {
-                    label: "moc1",
-                    icon: "puzzle",
-                    href: "https://reflenge.github.io/mobipita/moc1",
                 },
             ],
             // sidebar: [
