@@ -1,40 +1,75 @@
 ---
-title: MobiPita
-description: Starlightでドキュメントサイトの構築を始めましょう。
-template: splash # この行を削除またはコメントアウトすると、このページにサイトのサイドバーが表示されます。
+title: MobiPita ドキュメント
+description: MobiPitaプロジェクトの技術ドキュメント
+template: splash
 hero:
-  tagline: 新しいStarlightプロジェクトのセットアップおめでとうございます！
+  tagline: B2B2Cプラットフォームの技術設計とアーキテクチャ
   image:
     file: ../../assets/houston.webp
   actions:
-    - text: 例のガイド
-      link: /research/infrastructure-selection
+    - text: アーキテクチャを見る
+      link: /architecture/tenant-model
       icon: right-arrow
-    - text: Starlightのドキュメントを読む
-      link: https://starlight.astro.build
-      icon: external
+    - text: インフラ選定を読む
+      link: /research/infrastructure-selection
+      icon: document
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## 次のステップ
+## はじめに
+
+MobiPitaは、フランチャイズ型ビジネス向けのB2B2Cプラットフォームです。このドキュメントサイトでは、プロジェクトの技術設計、アーキテクチャ、インフラ選定に関する情報をまとめています。
+
+## 主要セクション
 
 <CardGrid stagger>
-	<Card title="コンテンツを更新する" icon="pencil">
-		`src/content/docs/index.mdx` を編集して、このページが変更されるのを確認してください。
+	<Card title="アーキテクチャ" icon="rocket">
+		システムの設計思想とアーキテクチャパターンについて解説します。
+		<ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+			<li><a href="/architecture/tenant-model">テナントモデル</a></li>
+			<li><a href="/architecture/stripe-connect">Stripe Connect</a></li>
+			<li><a href="/architecture/database-design">データベース設計</a></li>
+		</ul>
 	</Card>
-	<Card title="ページレイアウトを変更する" icon="document">
-		`src/content/docs/index.mdx` の `template: splash` を削除すると、このページに
-		サイドバーが表示されます。
+	<Card title="ミーティング記録" icon="list-format">
+		プロジェクトの会議記録と技術選定の議論をまとめています。
+		<ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+			<li><a href="/meetings/app-architecture">アプリケーション構成</a></li>
+			<li><a href="/meetings/meeting-notes">ミーティングノート</a></li>
+		</ul>
 	</Card>
-	<Card title="新しいコンテンツを追加する" icon="add-document">
-		`src/content/docs` にMarkdownまたはMDXファイルを追加して、新しいページを作成します。
-	</Card>
-	<Card title="サイトを設定する" icon="setting">
-		`astro.config.mjs` で `sidebar` とその他の設定を編集します。
-	</Card>
-	<Card title="ドキュメントを読む" icon="open-book">
-		[Starlightのドキュメント](https://starlight.astro.build/)で詳細を学びましょう。
+	<Card title="調査資料" icon="magnifier">
+		技術選定やインフラに関する調査結果をまとめています。
+		<ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+			<li><a href="/research/infrastructure-selection">インフラ選定</a></li>
+		</ul>
 	</Card>
 </CardGrid>
+
+## クイックスタート
+
+### アーキテクチャの理解
+
+1. **[テナントモデル](/architecture/tenant-model)** - RootTenant、Tenant、Locationの関係性とパターン
+2. **[Stripe Connect](/architecture/stripe-connect)** - 決済システムの設計と実装方針
+3. **[データベース設計](/architecture/database-design)** - マルチテナントDBの設計パターン
+
+### 技術スタック
+
+- **フロントエンド**: Next.js
+- **認証**: Clerk / Better Auth
+- **データベース**: PostgreSQL (Neon/Supabase)
+- **ストレージ**: Cloudflare R2 / AWS S3
+- **決済**: Stripe Connect
+- **インフラ**: Vercel → AWS (移行予定)
+
+## プロジェクト構成
+
+このプロジェクトは以下のような構成になっています：
+
+- **Master App**: マスター管理画面（`main`ブランチ）
+- **Customer App**: 顧客向けアプリケーション（`preview`, `development`, `dev-${feature-name}`ブランチ）
+
+詳細は[アプリケーション構成](/meetings/app-architecture)を参照してください。
