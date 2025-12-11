@@ -103,7 +103,7 @@ PostgreSQLを採用する場合、現代のマルチテナント開発のデフ�
 
 これは、PostgreSQLがデータベースエンジンレベルで持っている強力なセキュリティ機能を利用する方法で、アプリケーションのコード（WHERE句）でのバグによるデータ漏洩を「強制的に」防ぐことができます。
 
-データベース選定の詳細は[データベース選定](/architecture/database-selection)を参照してください。
+データベース選定の詳細は[データベース選定](/architecture/db/database-selection)を参照してください。
 
 以下に、PostgreSQLにおける概念、RLSの仕組み、そしてもう一つの選択肢であるスキーマ分離について解説します。
 
@@ -196,7 +196,7 @@ PostgreSQLを操作するために、**ORM（Object-Relational Mapping）**の�
 
 選択するORMによって、RLSやテナント分離をコード上でどう実装するかが変わります。
 
-詳細は[ORM選定](/architecture/orm-selection)を参照してください。
+詳細は[ORM選定](/architecture/db/orm-selection)を参照してください。
 
 :::tip[実装前の検討事項]
 以下の点は実装前に確定する必要があります：

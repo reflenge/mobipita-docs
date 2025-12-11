@@ -19,7 +19,7 @@ PostgreSQLを採用する場合、現代のマルチテナント開発のデフ�
 
 これは、PostgreSQLがデータベースエンジンレベルで持っている強力なセキュリティ機能を利用する方法で、アプリケーションのコード（WHERE句）でのバグによるデータ漏洩を「強制的に」防ぐことができます。
 
-詳細は[データベース設計](/architecture/database-design)の「Row Level Security (RLS) パターン」を参照してください。
+詳細は[データベース設計](/architecture/db/database-design)の「Row Level Security (RLS) パターン」を参照してください。
 
 ## データベース候補の比較
 
@@ -77,7 +77,7 @@ PostgreSQLを採用する場合、現代のマルチテナント開発のデフ�
 2. マルチテナントアプリケーションに適した機能
 3. 豊富なORMエコシステムとの互換性
 
-詳細は[データベース設計](/architecture/database-design)を参照してください。
+詳細は[データベース設計](/architecture/db/database-design)を参照してください。
 
 :::tip[実装前の検討事項]
 以下の点は実装前に確定する必要があります：
