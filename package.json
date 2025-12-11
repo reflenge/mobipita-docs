@@ -23,5 +23,8 @@
     "starlight-fullview-mode": "^0.2.6",
     "starlight-image-zoom": "^0.13.2",
     "starlight-links-validator": "^0.19.2"
+  },
+  "devDependencies": {
+    "wrangler": "^4.53.0"
   }
 }
