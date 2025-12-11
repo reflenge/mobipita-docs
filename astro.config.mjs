@@ -64,43 +64,43 @@ export default defineConfig({
                     href: "https://github.com/reflenge/mobipita",
                 },
             ],
-            sidebar: [
-                {
-                    label: "アーキテクチャ",
-                    items: [
-                        {
-                            label: "テナントモデル",
-                            slug: "architecture/tenant-model",
-                        },
-                        {
-                            label: "Stripe Connect",
-                            slug: "architecture/stripe-connect",
-                        },
-                        {
-                            label: "データベース設計",
-                            slug: "architecture/database-design",
-                        },
-                    ],
-                },
-                {
-                    label: "ミーティング",
-                    items: [
-                        {
-                            label: "アプリケーション構成",
-                            slug: "meetings/app-architecture",
-                        },
-                    ],
-                },
-                {
-                    label: "調査",
-                    items: [
-                        {
-                            label: "インフラ選定",
-                            slug: "research/infrastructure-selection",
-                        },
-                    ],
-                },
-            ],
+            // sidebar: [
+            //     {
+            //         label: "アーキテクチャ",
+            //         items: [
+            //             {
+            //                 label: "テナントモデル",
+            //                 slug: "architecture/tenant-model",
+            //             },
+            //             {
+            //                 label: "Stripe Connect",
+            //                 slug: "architecture/stripe-connect",
+            //             },
+            //             {
+            //                 label: "データベース設計",
+            //                 slug: "architecture/database-design",
+            //             },
+            //         ],
+            //     },
+            //     {
+            //         label: "ミーティング",
+            //         items: [
+            //             {
+            //                 label: "アプリケーション構成",
+            //                 slug: "meetings/app-architecture",
+            //             },
+            //         ],
+            //     },
+            //     {
+            //         label: "調査",
+            //         items: [
+            //             {
+            //                 label: "インフラ選定",
+            //                 slug: "research/infrastructure-selection",
+            //             },
+            //         ],
+            //     },
+            // ],
         }),
         sitemap(),
     ],

@@ -5,30 +5,33 @@ sidebar:
   order: 2
 ---
 
+:::caution[作業中]
+このドキュメントは現在**作業中**です。Stripe Connectの実装パターンは検討段階であり、最終的な設計は確定していません。
+:::
 
-## ざっくり前提
+## 基本概念
 
-登場人物をこう決める：
+本プロジェクトにおけるStripe Connectの構成要素は以下の通りです：
 
-* **プラットフォーム**：あなたのSaaS（Stripe の「プラットフォームアカウント」）
+* **プラットフォーム**：MobiPitaのSaaS（Stripe の「プラットフォームアカウント」）
 * **RootTenant**：本部（ブランド、本社）
-* **Tenant**：本部と契約してる運営者（フランチャイジーの会社など）
+* **Tenant**：本部と契約している運営者（フランチャイジーの会社など）
 * **Location**：店舗（物理拠点、高知店・移動店舗1号車など）
-* **エンドユーザー**：高齢者（予約してお金を払う人）
+* **エンドユーザー**：顧客（予約してお金を払う人）
 
-Stripe Connect の世界では、
+Stripe Connect では、以下の仕組みで決済を管理します：
 
-* **お金を最終的に受け取る主体 = 「Connectの connected account」になる人**
+* **お金を最終的に受け取る主体 = 「Connectの connected account」**
 * プラットフォームが
 
   * お金を集めて
-  * そこから「誰にいくら払うか」を API で制御する感じ。([Stripe][1])
+  * そこから「誰にいくら払うか」を API で制御する ([Stripe][1])
 
 ---
 
-## どこを「Connected Account」にするか
+## Connected Account の設計パターン
 
-大きく 3 パターン考えられる：
+以下の3つのパターンが考えられます：
 
 ### パターンA：Tenantだけを Connected Account にする
 
@@ -49,14 +52,15 @@ RootTenantへのロイヤリティは：
 * Stripe 外で「毎月の売上レポート」を見て請求書を出す
 * or プラットフォームから RootTenant 宛てに、別の支払い手段で送金
 
-→ **メリット**：実装がシンプル
-→ **デメリット**：本部へのロイヤリティが Stripe で自動分配されない
+**メリット**：実装がシンプル
+
+**デメリット**：本部へのロイヤリティが Stripe で自動分配されない
 
 ---
 
 ### パターンB：RootTenant と Tenant 両方を Connected Account にする（多者分配）
 
-ロイヤリティまで Stripe Connect で完結させたいなら、こっちが本命。
+ロイヤリティまで Stripe Connect で完結させたい場合に推奨されるパターンです。
 
 * **Connected Account = RootTenant（本部）**
 * **Connected Account = Tenant（運営者）**
@@ -84,45 +88,45 @@ RootTenantへのロイヤリティは：
   * `destination = root_tenant_account`
     を2本投げるイメージ
 
-→ **メリット**
+**メリット**
 
 * RootTenant も Tenant も自動で Stripe から振り込みされる
 * プラットフォームは「残り」を自分の売上にできる
 * multi-tenant to multi-tenant なロイヤリティ構造を素直に表現できる
 
-→ **注意点**
+**注意点**
 
-* Stripe Connect は「階層プラットフォーム」はサポートしてなくて、
-  **あくまで "あなたのプラットフォーム → 各 Connected Account" の一段構造**だけ。
-  RootTenant がさらにプラットフォームになって Tenant をぶらす、みたいなことは Stripe 上ではできない。([Stripe ドキュメント][3])
-* 「本部／運営者／店舗」みたいな階層は、**アプリ側のデータモデルで表現して、Stripe上は全部「プラットフォームにぶら下がる商売人たち」**とみなすイメージ。
+* Stripe Connect は「階層プラットフォーム」をサポートしておらず、
+  **あくまで "プラットフォーム → 各 Connected Account" の一段構造**のみです。
+  RootTenant がさらにプラットフォームになって Tenant を管理するような構成は、Stripe 上では実現できません。([Stripe ドキュメント][3])
+* 「本部／運営者／店舗」のような階層は、**アプリ側のデータモデルで表現し、Stripe上はすべて「プラットフォームに紐付く事業者」**として扱います。
 
 ---
 
 ### パターンC：RootTenantだけ Connected、Tenant はアプリ内の概念
 
-逆方向も一応あり得る：
+逆方向のパターンも考えられます：
 
-* **Connected Account = RootTenant（本部）だけ**
+* **Connected Account = RootTenant（本部）のみ**
 * Tenant は RootTenant 配下の「内部の運営者」として、アプリ側で管理する
 
-お金の流れ（1予約）：
+お金の流れ（1予約分）：
 
 1. プラットフォームアカウントで決済
 2. RootTenant connected account に Transfer（本部取り分全部）
 3. 本部は自社の会計システムなどで、
    「Tenant（運営者）の取り分」を別途支払う（Stripe外 ／ 別の送金手段）
 
-→ **典型的には**：
+**典型的な用途**：
 
 * 本部自身が「すべての売上を一度受ける」運営形態
-* フランチャイズというより「販売代理」や「直営＋歩合スタッフ」寄りの世界観
+* フランチャイズというより「販売代理」や「直営＋歩合スタッフ」寄りの構成
 
 ---
 
-## RootTenant / Tenant / Location 各パターンへの当てはめ
+## RootTenant / Tenant / Location 各パターンへの適用
 
-さっき整理した運営パターンに、B案（Root＋Tenant両方Connected）を軽くマッピングすると：
+[テナントモデル](/architecture/tenant-model)で整理した運営パターンに、パターンB（RootTenant＋Tenant両方Connected）を適用すると：
 
 ### R-1：直営のみ
 
@@ -133,8 +137,8 @@ RootTenant（本部A） … Connected Account
 Tenant：なし
 ```
 
-* Connect 的には「RootTenant = 1つの事業者」でしかない
-* Location ごとの配分はアプリのレポート上でやればOK
+* Connect 的には「RootTenant = 1つの事業者」として扱う
+* Location ごとの配分はアプリのレポート上で管理する
 
 ### R-2：直営 + フランチャイズ混在
 
@@ -174,52 +178,62 @@ RootTenant（本部C） … Connected Account
 
 ---
 
-## Express / Custom どっち系がイメージ近いか
+## Express Account と Custom Account の選択
 
-運営者や本部にどこまで Stripe の画面を触らせるかで決める感じ：
+運営者や本部にどこまで Stripe の画面を提供するかで選択が決まります：
 
 * **Express アカウント**
 
-  * Stripe が KYC・ダッシュボードを持っていて、
-    あなた側は「お金の流れとブランド」を制御するイメージ ([Stripe ドキュメント][4])
-  * オーナー側は「Stripeの簡易ダッシュボード」で売上や入金を見られる
+  * Stripe が KYC・ダッシュボードを提供し、
+    プラットフォーム側は「お金の流れとブランド」を制御する ([Stripe ドキュメント][4])
+  * オーナー側は「Stripeの簡易ダッシュボード」で売上や入金を確認できる
 * **Custom アカウント**
 
-  * オンボーディング、管理画面、レポートを全部あなた側で作る代わりに
+  * オンボーディング、管理画面、レポートをすべてプラットフォーム側で実装する代わりに
     コントロールは最大、責任も最大 ([Stripe ドキュメント][5])
 
-「高齢者向け予約」だけど、Connect の相手は **本部・運営者（法人）** なので、
-UI 的には：
+Connect の対象は **本部・運営者（法人）** であり、
+UI 的には以下のように分けられます：
 
 * 本部・運営者：Express or Custom（事業者向け）
-* 高齢者：普通の Checkout / PaymentElement だけ（Connect のアカウントにはならない）
+* 顧客：通常の Checkout / PaymentElement のみ（Connect のアカウントにはならない）
 
 ---
 
-## ざっくり結論
+## 推奨設計
 
-あなたの今の RootTenant / Tenant / Location モデルと Stripe Connect を合わせるなら、イメージとしては：
+RootTenant / Tenant / Location モデルと Stripe Connect を組み合わせる場合、以下の設計が推奨されます：
 
-* **Stripe 上の「Connected Account」 = お金を最終的に受け取る本部・運営者たち**
+* **Stripe 上の「Connected Account」 = お金を最終的に受け取る本部・運営者**
 
-  * 最小構成なら「TenantだけConnected」
-  * ロイヤリティまで自動化したければ「RootTenant も Tenant もConnected」
-* **Location はあくまでアプリ内メタデータ**
+  * 最小構成：TenantのみConnected
+  * ロイヤリティまで自動化：RootTenant も Tenant もConnected
+* **Location はアプリ内メタデータとして扱う**
 
-  * Stripe には Location ID を metadata で載せるだけにして、
-    店舗別売上管理は自前ロジックでやる
-* 支払いフローは
+  * Stripe には Location ID を metadata に含めるのみ
+  * 店舗別売上管理はアプリ側のロジックで実装
+* **支払いフロー**
 
   * プラットフォームでチャージ
   * Connect の「separate charges and transfers」で RootTenant / Tenant へ分配
-  * プラットフォームは残りを自分の売上としてキープ
+  * プラットフォームは残りを自分の売上として保持
 
-って設計が、一番キレイにハマると思う。
+この設計により、柔軟で拡張性の高い決済システムを構築できます。
 
-この前提で、
-「予約1件ごとにどの ID を Stripe の `metadata` に載せるか」
-「ロイヤリティ率をどこに持たせるか（RootTenantかTenantかLocationか）」
-あたりを一緒に詰めていくと、かなり実装まで落とし込めるはず。
+実装前に、以下の点を確定する必要があります：
+- 予約1件ごとにどの ID を Stripe の `metadata` に含めるか
+- ロイヤリティ率をどこに持たせるか（RootTenant / Tenant / Location）
+
+:::tip[実装前の検討事項]
+以下の点は実装前に確定する必要があります：
+- Connected Accountの作成タイミング（オンボーディング時 vs 初回決済時）
+- Express AccountとCustom Accountの選択基準
+- ロイヤリティ率の設定方法と変更フロー
+- エラーハンドリング（Transfer失敗時の処理）
+- テスト環境でのStripe Connect設定
+
+これらは実装フェーズで詳細化される予定です。
+:::
 
 [1]: https://stripe.com/en-jp/connect?utm_source=chatgpt.com "Stripe Connect | Platform and Marketplace Payment ..."
 [2]: https://docs.stripe.com/connect/separate-charges-and-transfers?utm_source=chatgpt.com "Create separate charges and transfers"
