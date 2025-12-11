@@ -1,7 +1,8 @@
 ---
-title: 0. RootTenant / Tenant / Location
+title: RootTenant / Tenant / Location
 description: どういう組み合わせになり得るのかをパターン別で解説
-
+sidebar:
+  order: 1
 ---
 
 まず前提の意味合わせだけサクッと：

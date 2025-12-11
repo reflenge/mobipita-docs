@@ -1,7 +1,8 @@
 ---
-title: 1. StripeConnectについて
+title: StripeConnectについて
 description: 「RootTenant / Tenant / Location」モデルに、Stripe Connect をどうかぶせるか
-
+sidebar:
+  order: 2
 ---
 
 
