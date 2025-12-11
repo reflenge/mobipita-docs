@@ -1,31 +1,26 @@
 {
-  "name": "mobipita",
-  "version": "1.0.0",
-  "description": "\"Mobile (moving)\" + \"Pita (fits perfectly/matches)\". We expressed the convenience of being able to \"precisely match the time\" with a detailed reservation system in 10-minute increments, and the peace of mind that the mobile store will \"arrive on time\" at the designated location.",
-  "homepage": "https://reflenge.github.io/mobipita/docs",
-  "bugs": {
-    "url": "https://github.com/reflenge/mobipita/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/reflenge/mobipita.git"
-  },
-  "author": "mosunset",
-  "type": "commonjs",
-  "main": "index.js",
-  "private": true,
+  "name": "docs",
+  "type": "module",
+  "version": "0.0.1",
   "scripts": {
-    "dev": "turbo run dev --parallel --continue",
-    "dev:moc1": "turbo run dev --filter=moc1",
-    "dev:docs": "turbo run dev --filter=docs",
-    "build": "turbo run build --continue",
-    "lint": "turbo run lint"
-  },
-  "packageManager": "pnpm@10.24.0",
-  "engines": {
-    "node": ">=22"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
   "dependencies": {
-    "turbo": "^2.6.1"
+    "@astrojs/sitemap": "^3.6.0",
+    "@astrojs/starlight": "^0.37.0",
+    "@mermaid-js/layout-elk": "^0.2.0",
+    "astro": "^5.6.1",
+    "astro-mermaid": "^1.2.0",
+    "mermaid": "^11.12.2",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "sharp": "^0.34.2",
+    "starlight-fullview-mode": "^0.2.6",
+    "starlight-image-zoom": "^0.13.2",
+    "starlight-links-validator": "^0.19.2"
   }
 }
