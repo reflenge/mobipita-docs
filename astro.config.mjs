@@ -1,13 +1,12 @@
-// @ts-check
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import starlightLinksValidator from "starlight-links-validator";
 import starlightImageZoom from "starlight-image-zoom";
 import sitemap from "@astrojs/sitemap";
 import mermaid from "astro-mermaid";
-import starlightFullViewMode from 'starlight-fullview-mode'
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
+import starlightFullViewMode from "starlight-fullview-mode";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 // https://astro.build/config
 export default defineConfig({
@@ -18,25 +17,27 @@ export default defineConfig({
     },
     integrations: [
         mermaid({
-            theme: 'forest',
+            theme: "forest",
             autoTheme: true,
             mermaidConfig: {
                 flowchart: {
-                    curve: 'basis'
-                }
+                    curve: "basis",
+                },
             },
         }),
         starlight({
-            plugins: [starlightLinksValidator(), starlightImageZoom(), starlightFullViewMode({
-                // Configuration options go here.
-            })],
+            plugins: [
+                starlightImageZoom(),
+                starlightFullViewMode(),
+                starlightLinksValidator(),
+            ],
             head: [
                 // Fathomのアナリティクススクリプトタグを追加する例。
                 {
-                    tag: 'link',
+                    tag: "link",
                     attrs: {
-                        href: 'https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css',
-                        rel: 'stylesheet',
+                        href: "https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css",
+                        rel: "stylesheet",
                     },
                 },
             ],
