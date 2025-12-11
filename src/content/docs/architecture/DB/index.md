@@ -13,9 +13,9 @@ sidebar:
 
 データベース設計の理解を深めるための推奨読書順序：
 
-1. **[データベース設計](/architecture/DB/database-design)** - 設計パターンの理解
-2. **[データベース選定](/architecture/DB/database-selection)** - データベースの選定
-3. **[ORM選定](/architecture/DB/orm-selection)** - ORMの選定と実装方法
+1. **[データベース設計](/architecture/db/database-design)** - 設計パターンの理解
+2. **[データベース選定](/architecture/db/database-selection)** - データベースの選定
+3. **[ORM選定](/architecture/db/orm-selection)** - ORMの選定と実装方法
 
 ---
 
@@ -50,7 +50,7 @@ MobiPitaでは、マルチテナントアーキテクチャとして**プール�
 
 ### データベース設計
 
-**ファイル**: [データベース設計](/architecture/DB/database-design)
+**ファイル**: [データベース設計](/architecture/db/database-design)
 
 マルチテナントDBの設計パターンについて解説します。
 
@@ -73,13 +73,13 @@ MobiPitaでは、マルチテナントアーキテクチャとして**プール�
   - もう一つの選択肢
   - テナントごとにスキーマを作成
 
-[詳細を見る →](/architecture/DB/database-design)
+[詳細を見る →](/architecture/db/database-design)
 
 ---
 
 ### データベース選定
 
-**ファイル**: [データベース選定](/architecture/DB/database-selection)
+**ファイル**: [データベース選定](/architecture/db/database-selection)
 
 PostgreSQL/Supabase、MySQL、DynamoDBなどのデータベース選定について解説します。
 
@@ -97,13 +97,13 @@ PostgreSQL/Supabase、MySQL、DynamoDBなどのデータベース選定につい
   - サーバーレスで自動スケーリング
   - リレーショナルデータモデルとの相性が悪い
 
-[詳細を見る →](/architecture/DB/database-selection)
+[詳細を見る →](/architecture/db/database-selection)
 
 ---
 
 ### ORM選定
 
-**ファイル**: [ORM選定](/architecture/DB/orm-selection)
+**ファイル**: [ORM選定](/architecture/db/orm-selection)
 
 Prisma、Drizzle ORM、TypeORMなどのORM選定について解説します。
 
@@ -124,7 +124,7 @@ Prisma、Drizzle ORM、TypeORMなどのORM選定について解説します。
   - アプローチA: アプリ側で制御（最も一般的・簡単）
   - アプローチB: RLSを利用（堅牢だが実装難易度・高）
 
-[詳細を見る →](/architecture/DB/orm-selection)
+[詳細を見る →](/architecture/db/orm-selection)
 
 ## 設計原則
 
@@ -148,7 +148,7 @@ Prisma、Drizzle ORM、TypeORMなどのORM選定について解説します。
 :::tip[次のステップ]
 データベース設計の理解を深めるには、以下の順序でドキュメントを読むことを推奨します：
 
-1. [データベース設計](/architecture/DB/database-design) - 設計パターンの理解
-2. [データベース選定](/architecture/DB/database-selection) - データベースの選定
-3. [ORM選定](/architecture/DB/orm-selection) - ORMの選定と実装方法
+1. [データベース設計](/architecture/db/database-design) - 設計パターンの理解
+2. [データベース選定](/architecture/db/database-selection) - データベースの選定
+3. [ORM選定](/architecture/db/orm-selection) - ORMの選定と実装方法
 :::

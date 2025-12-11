@@ -13,8 +13,8 @@ sidebar:
 
 Stripe Connectの理解を深めるための推奨読書順序：
 
-1. **[Stripe Connect](/architecture/Stripe/stripe-connect)** - 基本概念と設計パターン
-2. **[アカウントタイプの選択](/architecture/Stripe/account-types)** - Express AccountとCustom Accountの選定
+1. **[Stripe Connect](/architecture/stripe/stripe-connect)** - 基本概念と設計パターン
+2. **[アカウントタイプの選択](/architecture/stripe/account-types)** - Express AccountとCustom Accountの選定
 
 ---
 
@@ -49,7 +49,7 @@ RootTenant / Tenant / Location モデルと Stripe Connect を組み合わせる
 
 ### Stripe Connect
 
-**ファイル**: [Stripe Connect](/architecture/Stripe/stripe-connect)
+**ファイル**: [Stripe Connect](/architecture/stripe/stripe-connect)
 
 RootTenant / Tenant / LocationモデルへのStripe Connectの適用方法について解説します。
 
@@ -68,13 +68,13 @@ RootTenant / Tenant / LocationモデルへのStripe Connectの適用方法につ
 - **テナントモデルへの適用**: R-1、R-2、R-3パターンへの適用方法
 - **推奨設計**: ロイヤリティ分配の実装方法
 
-[詳細を見る →](/architecture/Stripe/stripe-connect)
+[詳細を見る →](/architecture/stripe/stripe-connect)
 
 ---
 
 ### アカウントタイプの選択
 
-**ファイル**: [アカウントタイプの選択](/architecture/Stripe/account-types)
+**ファイル**: [アカウントタイプの選択](/architecture/stripe/account-types)
 
 Express AccountとCustom Accountの選定について解説します。
 
@@ -90,7 +90,7 @@ Express AccountとCustom Accountの選定について解説します。
   - 開発工数が最も多い
 - **選定基準**: 開発工数、ブランド統一性、カスタマイズ性の比較
 
-[詳細を見る →](/architecture/Stripe/account-types)
+[詳細を見る →](/architecture/stripe/account-types)
 
 ## Stripe Connectの基本概念
 
@@ -107,7 +107,7 @@ Stripe Connect では、以下の仕組みで決済を管理します：
 * **お金を最終的に受け取る主体 = 「Connectの connected account」**
 * プラットフォームがお金を集めて、そこから「誰にいくら払うか」を API で制御する
 
-詳細は[Stripe Connect](/architecture/Stripe/stripe-connect)を参照してください。
+詳細は[Stripe Connect](/architecture/stripe/stripe-connect)を参照してください。
 
 ## 推奨設計
 
@@ -145,6 +145,6 @@ RootTenant / Tenant / Location モデルと Stripe Connect を組み合わせる
 :::tip[次のステップ]
 Stripe Connectの理解を深めるには、以下の順序でドキュメントを読むことを推奨します：
 
-1. [Stripe Connect](/architecture/Stripe/stripe-connect) - 基本概念と設計パターン
-2. [アカウントタイプの選択](/architecture/Stripe/account-types) - Express AccountとCustom Accountの選定
+1. [Stripe Connect](/architecture/stripe/stripe-connect) - 基本概念と設計パターン
+2. [アカウントタイプの選択](/architecture/stripe/account-types) - Express AccountとCustom Accountの選定
 :::

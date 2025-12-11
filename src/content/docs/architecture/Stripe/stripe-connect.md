@@ -178,7 +178,7 @@ RootTenant（本部C） … Connected Account
 
 ---
 
-詳細は[Express Account と Custom Account の選択](/architecture/Stripe/account-types)を参照してください。
+詳細は[Express Account と Custom Account の選択](/architecture/stripe/account-types)を参照してください。
 
 ---
 

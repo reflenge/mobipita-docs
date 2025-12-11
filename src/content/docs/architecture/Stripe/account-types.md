@@ -75,7 +75,7 @@ UI 的には以下のように分けられます：
 - 独自のオンボーディングフローが必要な場合
 - 十分な開発リソースがある場合
 
-詳細は[Stripe Connect](/architecture/Stripe/stripe-connect)を参照してください。
+詳細は[Stripe Connect](/architecture/stripe/stripe-connect)を参照してください。
 
 :::tip[実装前の検討事項]
 以下の点は実装前に確定する必要があります：

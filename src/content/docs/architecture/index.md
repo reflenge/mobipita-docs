@@ -14,8 +14,8 @@ sidebar:
 MobiPitaのアーキテクチャを理解するための推奨読書順序：
 
 1. **[テナントモデル](/architecture/tenant-model)** - 基本的なデータモデルの理解
-2. **[Stripe Connect](/architecture/Stripe/stripe-connect)** - 決済システムの実装方法
-3. **[データベース設計](/architecture/DB/database-design)** - データの保存方法とセキュリティ
+2. **[Stripe Connect](/architecture/stripe/stripe-connect)** - 決済システムの実装方法
+3. **[データベース設計](/architecture/db/database-design)** - データの保存方法とセキュリティ
 
 ---
 
@@ -71,17 +71,17 @@ RootTenant、Tenant、Locationの関係性と、様々なビジネスパター�
 
 ### Stripe Connect
 
-**セクション**: [Stripe](/architecture/Stripe)
+**セクション**: [Stripe](/architecture/stripe)
 
 Stripe Connectによる決済システムの設計について解説します。
 
 #### 主要なドキュメント
 
-- **[Stripe Connect](/architecture/Stripe/stripe-connect)**: Connected Accountの設計パターン
+- **[Stripe Connect](/architecture/stripe/stripe-connect)**: Connected Accountの設計パターン
   - パターンA: TenantだけをConnected Accountにする
   - パターンB: RootTenantとTenant両方をConnected Accountにする（推奨）
   - パターンC: RootTenantだけConnected、Tenantはアプリ内の概念
-- **[アカウントタイプの選択](/architecture/Stripe/account-types)**: Express AccountとCustom Accountの選定
+- **[アカウントタイプの選択](/architecture/stripe/account-types)**: Express AccountとCustom Accountの選定
 
 #### 主要な内容
 
@@ -90,25 +90,25 @@ Stripe Connectによる決済システムの設計について解説します。
 - Express AccountとCustom Accountの選択
 - ロイヤリティ分配の実装
 
-[詳細を見る →](/architecture/Stripe)
+[詳細を見る →](/architecture/stripe)
 
 ---
 
 ### データベース設計
 
-**セクション**: [データベース](/architecture/DB)
+**セクション**: [データベース](/architecture/db)
 
 マルチテナントDBの設計パターンと選定について解説します。
 
 #### 主要なドキュメント
 
-- **[データベース設計](/architecture/DB/database-design)**: マルチテナントDBの設計パターン
+- **[データベース設計](/architecture/db/database-design)**: マルチテナントDBの設計パターン
   - プールモデル（完全共有・論理分離）★推奨
   - サイロモデル（完全分離・物理分離）
   - ブリッジモデル（ハイブリッド）
   - RLS（Row Level Security）パターン
-- **[データベース選定](/architecture/DB/database-selection)**: PostgreSQL/Supabase、MySQL、DynamoDBの比較
-- **[ORM選定](/architecture/DB/orm-selection)**: Prisma、Drizzle ORM、TypeORMの比較
+- **[データベース選定](/architecture/db/database-selection)**: PostgreSQL/Supabase、MySQL、DynamoDBの比較
+- **[ORM選定](/architecture/db/orm-selection)**: Prisma、Drizzle ORM、TypeORMの比較
 
 #### 主要な内容
 
@@ -117,7 +117,7 @@ Stripe Connectによる決済システムの設計について解説します。
 - データベース選定
 - ORM選定
 
-[詳細を見る →](/architecture/DB)
+[詳細を見る →](/architecture/db)
 
 ## アーキテクチャの全体像
 
@@ -143,7 +143,7 @@ B2B2Cプラットフォームとして、**Stripe Connect**を使用して決済
 - Locationはアプリ内メタデータとして管理
 - ロイヤリティの自動分配
 
-詳細は[Stripe](/architecture/Stripe)セクションを参照してください。
+詳細は[Stripe](/architecture/stripe)セクションを参照してください。
 
 ### 3. データベース設計
 
@@ -154,7 +154,7 @@ B2B2Cプラットフォームとして、**Stripe Connect**を使用して決済
 - `tenant_id`による論理的な分離
 - RLS（Row Level Security）によるセキュリティ確保
 
-詳細は[データベース](/architecture/DB)セクションを参照してください。
+詳細は[データベース](/architecture/db)セクションを参照してください。
 
 ## 設計原則
 
@@ -169,6 +169,6 @@ B2B2Cプラットフォームとして、**Stripe Connect**を使用して決済
 アーキテクチャの理解を深めるには、以下の順序でドキュメントを読むことを推奨します：
 
 1. [テナントモデル](/architecture/tenant-model) - 基本的なデータモデルの理解
-2. [Stripe](/architecture/Stripe) - 決済システムの実装方法
-3. [データベース](/architecture/DB) - データの保存方法とセキュリティ
+2. [Stripe](/architecture/stripe) - 決済システムの実装方法
+3. [データベース](/architecture/db) - データの保存方法とセキュリティ
 :::
