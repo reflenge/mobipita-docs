@@ -8,13 +8,17 @@ import starlightFullViewMode from "starlight-fullview-mode";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 
+import cloudflare from "@astrojs/cloudflare";
+
 // https://astro.build/config
 export default defineConfig({
     site: "https://mobipita-docs.reflenge.workers.dev",
+
     markdown: {
         remarkPlugins: [remarkMath],
         rehypePlugins: [[rehypeKatex, { strict: true }]],
     },
+
     integrations: [
         mermaid({
             theme: "forest",
@@ -60,20 +64,50 @@ export default defineConfig({
                     href: "https://github.com/reflenge/mobipita",
                 },
             ],
-            // sidebar: [
-            //     {
-            //         label: "Guides",
-            //         items: [
-            //             // Each item here is one entry in the navigation menu.
-            //             { label: "Example Guide", slug: "guides/example" },
-            //         ],
-            //     },
-            //     {
-            //         label: "Reference",
-            //         autogenerate: { directory: "reference" },
-            //     },
-            // ],
+            sidebar: [
+                {
+                    label: "アーキテクチャ",
+                    items: [
+                        {
+                            label: "テナントモデル",
+                            slug: "architecture/tenant-model",
+                        },
+                        {
+                            label: "Stripe Connect",
+                            slug: "architecture/stripe-connect",
+                        },
+                        {
+                            label: "データベース設計",
+                            slug: "architecture/database-design",
+                        },
+                    ],
+                },
+                {
+                    label: "ミーティング",
+                    items: [
+                        {
+                            label: "アプリケーション構成",
+                            slug: "meetings/app-architecture",
+                        },
+                        {
+                            label: "ミーティングノート",
+                            slug: "meetings/meeting-notes",
+                        },
+                    ],
+                },
+                {
+                    label: "調査",
+                    items: [
+                        {
+                            label: "インフラ選定",
+                            slug: "research/infrastructure-selection",
+                        },
+                    ],
+                },
+            ],
         }),
         sitemap(),
     ],
+
+    adapter: cloudflare(),
 });
