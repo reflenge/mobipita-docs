@@ -1,8 +1,8 @@
 ---
-title: アプリケーション構成について
+title: アプリケーション構成
 description: Master AppとCustomer Appの分離構成について
-sidebar:
-  order: 1
+# sidebar:
+#   order: 1
 ---
 
 :::caution[作業中]

@@ -1,8 +1,8 @@
 ---
-title: Express Account と Custom Account の選択
-description: Stripe Connectのアカウントタイプ選定について
-sidebar:
-  order: 4
+title: アカウントタイプ
+description: Stripe Connectのアカウントタイプ選定（Express Account / Custom Account）
+# sidebar:
+#   order: 2
 ---
 
 :::caution[作業中]

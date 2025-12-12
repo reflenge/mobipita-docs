@@ -67,15 +67,41 @@ export default defineConfig({
             sidebar: [
                 {
                     label: "アーキテクチャ",
-                    autogenerate: { directory: 'architecture' },
+                    items: [
+                        { label: "アーキテクチャ", link: "/architecture/" },
+                        { label: "RootTenant / Tenant / Location", link: "/architecture/tenant-model" },
+                        {
+                            label: "Stripe",
+                            items: [
+                                { label: "Stripe Connect", link: "/architecture/stripe/stripe-connect" },
+                                { label: "アカウントタイプ", link: "/architecture/stripe/account-types" },
+                            ],
+                        },
+                        {
+                            label: "データベース",
+                            items: [
+                                { label: "データベース設計", link: "/architecture/db/database-design" },
+                                { label: "データベース選定", link: "/architecture/db/database-selection" },
+                                { label: "ORM選定", link: "/architecture/db/orm-selection" },
+                            ],
+                        },
+                        { label: "認証", link: "/architecture/auth/provider-selection" },
+                        { label: "ストレージ", link: "/architecture/storage/selection" },
+                        { label: "デプロイ", link: "/architecture/deploy/strategy" },
+                        { label: "バックエンド", link: "/architecture/backend/selection" },
+                    ],
                 },
                 {
                     label: "ミーティング",
-                    autogenerate: { directory: 'meetings' },
+                    items: [
+                        { label: "アプリケーション構成", link: "/meetings/app-architecture" },
+                    ],
                 },
                 {
                     label: "調査",
-                    autogenerate: { directory: 'research' },
+                    items: [
+                        { label: "インフラ選定", link: "/research/infrastructure-selection" },
+                    ],
                 },
             ],
         }),

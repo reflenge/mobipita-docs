@@ -1,8 +1,8 @@
 ---
 title: データベース選定
 description: PostgreSQL/Supabase、MySQL、DynamoDBなどのデータベース選定について
-sidebar:
-  order: 7
+# sidebar:
+#   order: 2
 ---
 
 :::caution[作業中]

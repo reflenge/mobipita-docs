@@ -1,8 +1,8 @@
 ---
 title: Stripe Connect
 description: 「RootTenant / Tenant / Location」モデルに、Stripe Connect をどう適用するか
-sidebar:
-  order: 3
+# sidebar:
+#   order: 1
 ---
 
 :::caution[作業中]

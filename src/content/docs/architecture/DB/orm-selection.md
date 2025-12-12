@@ -1,8 +1,8 @@
 ---
 title: ORM選定
 description: Prisma、Drizzle ORM、TypeORMなどのORM選定について
-sidebar:
-  order: 8
+# sidebar:
+#   order: 3
 ---
 
 :::caution[作業中]

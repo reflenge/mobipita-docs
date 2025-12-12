@@ -1,8 +1,8 @@
 ---
-title: 技術調査報告書：B2B2Cアプリケーションにおけるインフラ選定と移行戦略
+title: インフラ選定
 description: B2B2Cプロダクトのインフラ選定と移行戦略
-sidebar:
-  order: 1
+# sidebar:
+#   order: 1
 ---
 
 :::caution[作業中]

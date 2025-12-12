@@ -1,8 +1,8 @@
 ---
-title: マルチテナントのDB設計について
-description: RLS と Schema分離の違い
-sidebar:
-  order: 6
+title: データベース設計
+description: マルチテナントDBの設計パターン（RLS と Schema分離）
+# sidebar:
+#   order: 1
 ---
 
 :::caution[作業中]

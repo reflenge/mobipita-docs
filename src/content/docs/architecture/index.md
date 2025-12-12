@@ -1,8 +1,8 @@
 ---
 title: アーキテクチャ
 description: システムの設計思想とアーキテクチャパターン
-sidebar:
-  order: 0
+# sidebar:
+#   order: 0
 ---
 
 :::caution[作業中]
@@ -26,6 +26,10 @@ MobiPitaのアーキテクチャを理解するための推奨読書順序：
   - [テナントモデル](#テナントモデル)
   - [Stripe Connect](#stripe-connect)
   - [データベース設計](#データベース設計)
+  - [認証](#認証)
+  - [ストレージ](#ストレージ)
+  - [デプロイ](#デプロイ)
+  - [バックエンド](#バックエンド)
 - [アーキテクチャの全体像](#アーキテクチャの全体像)
 - [設計原則](#設計原則)
 
@@ -71,57 +75,112 @@ RootTenant、Tenant、Locationの関係性と、様々なビジネスパター�
 
 ### Stripe Connect
 
-**セクション**: [Stripe](/architecture/stripe)
+**ファイル**: [Stripe Connect](/architecture/stripe/stripe-connect)
 
 Stripe Connectによる決済システムの設計について解説します。
 
-#### 主要なドキュメント
+#### 主要な内容
 
-- **[Stripe Connect](/architecture/stripe/stripe-connect)**: Connected Accountの設計パターン
+- Connected Accountの設計パターン
   - パターンA: TenantだけをConnected Accountにする
   - パターンB: RootTenantとTenant両方をConnected Accountにする（推奨）
   - パターンC: RootTenantだけConnected、Tenantはアプリ内の概念
-- **[アカウントタイプの選択](/architecture/stripe/account-types)**: Express AccountとCustom Accountの選定
-
-#### 主要な内容
-
-- Stripe Connectの基本概念
-- Connected Accountの設計パターン
 - Express AccountとCustom Accountの選択
 - ロイヤリティ分配の実装
 
-[詳細を見る →](/architecture/stripe)
+関連ドキュメント: [アカウントタイプ](/architecture/stripe/account-types)
+
+[詳細を見る →](/architecture/stripe/stripe-connect)
 
 ---
 
 ### データベース設計
 
-**セクション**: [データベース](/architecture/db)
+**ファイル**: [データベース設計](/architecture/db/database-design)
 
 マルチテナントDBの設計パターンと選定について解説します。
 
-#### 主要なドキュメント
+#### 主要な内容
 
-- **[データベース設計](/architecture/db/database-design)**: マルチテナントDBの設計パターン
+- マルチテナントDBの設計パターン
   - プールモデル（完全共有・論理分離）★推奨
   - サイロモデル（完全分離・物理分離）
   - ブリッジモデル（ハイブリッド）
   - RLS（Row Level Security）パターン
-- **[データベース選定](/architecture/db/database-selection)**: PostgreSQL/Supabase、MySQL、DynamoDBの比較
-- **[ORM選定](/architecture/db/orm-selection)**: Prisma、Drizzle ORM、TypeORMの比較
+
+関連ドキュメント: [データベース選定](/architecture/db/database-selection)、[ORM選定](/architecture/db/orm-selection)
+
+[詳細を見る →](/architecture/db/database-design)
+
+---
+
+### 認証
+
+**ファイル**: [認証](/architecture/auth/provider-selection)
+
+認証システムの設計と選定について解説します。
 
 #### 主要な内容
 
-- プールモデル（完全共有・論理分離）
-- RLS（Row Level Security）パターン
-- データベース選定
-- ORM選定
+- Clerk（検討中）: マルチテナント対応のOrganizations機能
+- Better Auth（検討中）: オープンソースの認証ライブラリ
+- マルチテナント対応の実装方法
 
-[詳細を見る →](/architecture/db)
+[詳細を見る →](/architecture/auth/provider-selection)
+
+---
+
+### ストレージ
+
+**ファイル**: [ストレージ](/architecture/storage/selection)
+
+オブジェクトストレージの設計と選定について解説します。
+
+#### 主要な内容
+
+- AWS S3（検討中）: 業界標準のオブジェクトストレージ
+- Cloudflare R2（検討中）: S3互換API、データ転送量が無料
+- マルチテナント対応の実装方法
+
+[詳細を見る →](/architecture/storage/selection)
+
+---
+
+### デプロイ
+
+**ファイル**: [デプロイ](/architecture/deploy/strategy)
+
+デプロイ戦略とインフラ選定について解説します。
+
+#### 主要な内容
+
+- Vercel（検討中）: 初期段階での開発速度最大化
+- AWS（検討中）: 移行先としてのコスト最適化
+- 移行ロードマップ
+
+[詳細を見る →](/architecture/deploy/strategy)
+
+---
+
+### バックエンド
+
+**ファイル**: [バックエンド](/architecture/backend/selection)
+
+バックエンドサービスの設計と選定について解説します。
+
+#### 主要な内容
+
+- Convex（検討中）: リアルタイムデータベースとサーバーレス関数
+- リアルタイム機能の実装
+- マルチテナント対応の実装方法
+
+[詳細を見る →](/architecture/backend/selection)
+
+---
 
 ## アーキテクチャの全体像
 
-MobiPitaのアーキテクチャは、以下の3つの主要な設計パターンで構成されています：
+MobiPitaのアーキテクチャは、以下の主要な設計パターンで構成されています：
 
 ### 1. テナントモデル
 
@@ -143,7 +202,7 @@ B2B2Cプラットフォームとして、**Stripe Connect**を使用して決済
 - Locationはアプリ内メタデータとして管理
 - ロイヤリティの自動分配
 
-詳細は[Stripe](/architecture/stripe)セクションを参照してください。
+詳細は[Stripe Connect](/architecture/stripe/stripe-connect)を参照してください。
 
 ### 3. データベース設計
 
@@ -154,7 +213,51 @@ B2B2Cプラットフォームとして、**Stripe Connect**を使用して決済
 - `tenant_id`による論理的な分離
 - RLS（Row Level Security）によるセキュリティ確保
 
-詳細は[データベース](/architecture/db)セクションを参照してください。
+詳細は[データベース設計](/architecture/db/database-design)を参照してください。
+
+### 4. 認証システム
+
+マルチテナント対応の認証システムを検討しています。
+
+主な設計ポイント：
+- Clerk / Better Auth（検討中）による認証
+- マルチテナント対応の実装方法
+- 階層的な権限管理
+
+詳細は[認証](/architecture/auth/provider-selection)を参照してください。
+
+### 5. ストレージ
+
+画像やファイルを保存するためのオブジェクトストレージを検討しています。
+
+主な設計ポイント：
+- AWS S3 / Cloudflare R2（検討中）
+- マルチテナント対応のデータ分離
+- コスト効率の良い設計
+
+詳細は[ストレージ](/architecture/storage/selection)を参照してください。
+
+### 6. デプロイ戦略
+
+段階的なデプロイ戦略を検討しています。
+
+主な設計ポイント：
+- 初期段階: Vercel（検討中）で開発速度を最大化
+- 移行先: AWS（検討中）でコスト最適化
+- ベンダーロックイン回避
+
+詳細は[デプロイ](/architecture/deploy/strategy)を参照してください。
+
+### 7. バックエンド
+
+リアルタイム機能やサーバーレス関数を提供するバックエンドサービスを検討しています。
+
+主な設計ポイント：
+- Convex（検討中）によるリアルタイム機能
+- サーバーレス関数の設計
+- マルチテナント対応の実装方法
+
+詳細は[バックエンド](/architecture/backend/selection)を参照してください。
 
 ## 設計原則
 
@@ -169,6 +272,10 @@ B2B2Cプラットフォームとして、**Stripe Connect**を使用して決済
 アーキテクチャの理解を深めるには、以下の順序でドキュメントを読むことを推奨します：
 
 1. [テナントモデル](/architecture/tenant-model) - 基本的なデータモデルの理解
-2. [Stripe](/architecture/stripe) - 決済システムの実装方法
-3. [データベース](/architecture/db) - データの保存方法とセキュリティ
+2. [Stripe Connect](/architecture/stripe/stripe-connect) - 決済システムの実装方法
+3. [データベース設計](/architecture/db/database-design) - データの保存方法とセキュリティ
+4. [認証](/architecture/auth/provider-selection) - 認証システムの設計
+5. [ストレージ](/architecture/storage/selection) - オブジェクトストレージの設計
+6. [デプロイ](/architecture/deploy/strategy) - デプロイ戦略
+7. [バックエンド](/architecture/backend/selection) - バックエンドサービスの設計
 :::

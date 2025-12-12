@@ -1,8 +1,8 @@
 ---
 title: RootTenant / Tenant / Location
 description: どういう組み合わせになり得るのかをパターン別で解説
-sidebar:
-  order: 1
+# sidebar:
+#   order: 1
 ---
 
 :::caution[作業中]
