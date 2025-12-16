@@ -66,6 +66,10 @@ export default defineConfig({
             ],
             sidebar: [
                 {
+                    label: "MobiPita",
+                    link: "/",
+                },
+                {
                     label: "アーキテクチャ",
                     items: [
                         { label: "アーキテクチャ", link: "/architecture/" },
