@@ -1,13 +1,8 @@
 ---
 title: ORM選定
 description: Prisma、Drizzle ORM、TypeORMなどのORM選定について
-# sidebar:
-#   order: 3
----
 
-:::caution[作業中]
-このドキュメントは現在**作業中**です。ORM選定は検討段階であり、最終的な選定は確定していません。
-:::
+---
 
 ## 概要
 

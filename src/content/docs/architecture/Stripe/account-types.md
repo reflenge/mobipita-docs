@@ -1,13 +1,8 @@
 ---
 title: アカウントタイプ
 description: Stripe Connectのアカウントタイプ選定（Express Account / Custom Account）
-# sidebar:
-#   order: 2
----
 
-:::caution[作業中]
-このドキュメントは現在**作業中**です。アカウントタイプの選定は検討段階であり、最終的な選定は確定していません。
-:::
+---
 
 ## 概要
 

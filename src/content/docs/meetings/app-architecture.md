@@ -1,13 +1,8 @@
 ---
 title: アプリケーション構成
 description: Master AppとCustomer Appの分離構成について
-# sidebar:
-#   order: 1
----
 
-:::caution[作業中]
-このドキュメントは現在**作業中**です。アプリケーション構成は検討段階であり、実装前に変更される可能性があります。
-:::
+---
 
 ## master2B2B2C 構成について
 

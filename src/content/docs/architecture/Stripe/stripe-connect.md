@@ -1,13 +1,8 @@
 ---
 title: Stripe Connect
 description: 「RootTenant / Tenant / Location」モデルに、Stripe Connect をどう適用するか
-# sidebar:
-#   order: 1
----
 
-:::caution[作業中]
-このドキュメントは現在**作業中**です。Stripe Connectの実装パターンは検討段階であり、最終的な設計は確定していません。
-:::
+---
 
 ## 基本概念
 
