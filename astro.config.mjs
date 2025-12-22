@@ -52,10 +52,6 @@ export default defineConfig({
                     label: "日本語",
                     lang: "ja",
                 },
-                en: {
-                    label: "English",
-                    lang: "en",
-                },
             },
             social: [
                 {
