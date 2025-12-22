@@ -4,6 +4,15 @@ description: Master AppとCustomer Appの分離構成について
 
 ---
 
+:::tip[現在の結論]
+- Auth: Clerk（Organizations = RootTenant）
+- DB / BaaS: Convex
+- Storage: Convex File Storage（暫定）
+- Deploy: Vercel（フロント） + Convex（バックエンドBaaS）
+
+詳細は[Current Stack](/architecture/stack/current)を参照してください。
+:::
+
 ## master2B2B2C 構成について
 
 MobiPitaでは、マスター管理機能と顧客向け機能を分離した構成を検討しています。
@@ -73,7 +82,7 @@ B2B2Cの各レイヤー（RootTenant → Tenant → Location → User）向け�
 
 ### App（ホスティング）
 
-**候補**: `Vercel` or `AWS`
+**採用（暫定）**: `Vercel`（フロント）
 
 マルチテナントサービスをホストするための環境が必要です。
 
@@ -81,30 +90,31 @@ B2B2Cの各レイヤー（RootTenant → Tenant → Location → User）向け�
 - `https://<会社>.mobipita.com` の形式
 - 各テナントごとに独立したサブドメインを割り当て
 
-:::tip[検討中]
-初期はVercelで開始し、成長に合わせてAWSへ移行する戦略を検討中です。
-詳細は[インフラ選定](/research/infrastructure-selection)を参照してください。
+:::tip[補足]
+初期はVercelで開始し、成長に合わせてフロントの compute をAWSへ移行する戦略です。
+詳細は[デプロイ](/architecture/deploy/strategy)を参照してください。
 :::
 
 ### Auth（認証）
 
-**候補**: `Clerk` or `Better Auth`
+**採用（暫定）**: `Clerk`
 
 **検討事項**:
-- 会社ごとにそれぞれ用意するか、統一環境か
-- マルチテナント対応の実装方法
+- Organizations = RootTenant（企業境界）
+- アクティブOrgから `rootTenantId` を確定する
 
 :::tip[検討中]
-認証プロバイダーの選定と、マルチテナント対応の実装方法は検討中です。
+詳細は[認証](/architecture/auth/provider-selection)と
+[Request Context](/architecture/tenancy/request-context)を参照してください。
 :::
 
 ### DB（データベース）
 
-**候補**: `Cloudflare D1` or `AWS RDS` (PostgreSQL)
+**採用（暫定）**: `Convex`
 
 **検討事項**:
-- 会社ごとにそれぞれを用意するか、共有DBでテナント分離するか
-- マルチテナントDBの設計パターン（RLS vs Schema分離）
+- すべての読み書きは関数経由でガードする
+- `rootTenantId` で必ず分離する
 
 :::tip[検討中]
 データベース設計の詳細は[データベース設計](/architecture/db/database-design)を参照してください。
@@ -112,14 +122,13 @@ B2B2Cの各レイヤー（RootTenant → Tenant → Location → User）向け�
 
 ### Storage（ストレージ）
 
-**候補**: `AWS S3` or `Cloudflare R2`
+**採用（暫定）**: `Convex File Storage`
 
 **検討事項**:
-- 会社ごとにそれぞれを用意するか、統一バケットでプレフィックス分離するか
-- 料金による選定
+- 大容量やCDN要件が出たら R2/S3 併用を検討する
 
 :::tip[検討中]
-ストレージの分離方法と料金比較は検討中です。
+詳細は[ストレージ](/architecture/storage/selection)を参照してください。
 :::
 
 ### Payment（決済）

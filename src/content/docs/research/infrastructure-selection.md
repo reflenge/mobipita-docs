@@ -4,6 +4,15 @@ description: B2B2Cプロダクトのインフラ選定と移行戦略
 
 ---
 
+:::tip[現在の結論]
+- Auth: Clerk（Organizations = RootTenant）
+- DB / BaaS: Convex
+- Storage: Convex File Storage（暫定）
+- Deploy: Vercel（フロント） + Convex（バックエンドBaaS）
+
+詳細は[Current Stack](/architecture/stack/current)を参照してください。
+:::
+
 ## 1\. 主要4大クラウド比較と選定指針
 
 各クラウドの「機能」だけでなく、「設計思想」と「採用すべきフェーズ」の比較分析。
@@ -17,9 +26,9 @@ description: B2B2Cプロダクトのインフラ選定と移行戦略
 
 -----
 
-## 2\. 初期構成案：Vercel + Clerk + R2 (Modern PaaS)
+## 2\. 初期構成案：Vercel + Clerk + Convex (Modern BaaS)
 
-開発スピード（Time to Market）を最大化しつつ、ランニングコストを抑える現代的な構成です。
+開発スピード（Time to Market）を最大化しつつ、運用負荷を抑える現代的な構成です。
 
 ### アーキテクチャ図（概念）
 
@@ -27,23 +36,21 @@ description: B2B2Cプロダクトのインフラ選定と移行戦略
 graph TD
     User[ユーザー] --> Vercel[Vercel #040;Next.js Compute#041;]
     Vercel -- Auth --> Clerk[Clerk #040;認証/ユーザー管理#041;]
-    Vercel -- DB Query --> Neon[Neon/Supabase #040;PostgreSQL#041;]
-    Vercel -- Asset/Image --> R2[Cloudflare R2 #040;オブジェクトストレージ#041;]
+    Vercel -- DB/Functions --> Convex[Convex #040;DB/Functions#041;]
+    Vercel -- File Upload --> ConvexStorage[Convex File Storage]
 
     subgraph "External Services"
         Clerk
-        Neon
-        R2
+        Convex
+        ConvexStorage
     end
 ```
 
 ### この構成のメリット
 
 1.  **ゼロ・インフラ構築:** サーバー設定、ロードバランサー、SSL証明書管理が不要。`git push`でデプロイ完了。
-2.  **B2B機能の即時実装:** Clerkの「Organizations機能」により、マルチテナント（企業ごとの権限管理）を自前実装せず利用可能。
-3.  **コスト効率（初期）:**
-      * **Vercel:** Hobbyプラン（無料）〜Proプラン（$20/月）で開始可能。
-      * **R2:** AWS S3で最も高額になりがちな「データ転送量（Egress）」が無料。
+2.  **B2B機能の即時実装:** ClerkのOrganizationsにより、企業境界を自前実装せず利用可能。
+3.  **開発速度の最大化:** ConvexでDB/Functions/Realtimeを一体で扱える。
 
 -----
 
@@ -65,11 +72,11 @@ graph TD
 
       * **理由:** Vercel独自のAPIであり、他社互換性がない。
 
-  * **✅ OK:** Cloudflare R2 + **AWS SDK v3 (`@aws-sdk/client-s3`)**
+  * **✅ OK:** Convex File Storage（暫定）
+      * **理由:** アプリ内アップロードを最小構成で進められる。
+      * **補足:** 大容量やCDN要件が出たら R2/S3 を併用する。
 
-      * **理由:** R2はS3互換APIを持っている。AWS SDKを使って実装しておけば、環境変数のエンドポイントを変えるだけで、コード修正なしにAmazon S3へ切り替えられる。
-
-    <!-- end list -->
+  * **R2/S3 併用時の実装例**
 
     ```typescript
     // 実装イメージ
@@ -84,8 +91,9 @@ graph TD
 
   * **❌ NG:** Vercel KV / Vercel Postgres SDK
       * **理由:** Vercelプラットフォームに強く統合されており、外部からの接続や移行が面倒。
-  * **✅ OK:** Neon / Supabase + **Prisma ORM (または Drizzle)**
-      * **理由:** TCP接続（またはHTTPプロキシ）で標準的なPostgreSQLとして利用する。ORMを挟むことで、DBの接続先が変わってもアプリケーションコードへの影響をゼロにする。
+  * **✅ OK:** Convex（BaaS）
+      * **理由:** DB/Functionsを一体で扱い、テナント境界を関数側で強制できる。
+      * **補足:** 退出を想定し、データモデルは標準的に保ち、export/import を計画しておく。
 
 ### ④ 非同期処理・Cron (Async/Job)
 
@@ -121,7 +129,7 @@ Vercelの役割（Compute）のみをAWSに移します。DBやAuthはそのま�
 ### Phase 3: インフラの切り替え (DNS Switch)
 
 1.  AWS環境にDockerコンテナをデプロイ。
-2.  ClerkやDBの「許可されたドメイン/IP」にAWS環境を追加。
+2.  ClerkやConvexの「許可されたドメイン/IP」にAWS環境を追加。
 3.  DNS（Route53等）の設定を変更し、トラフィックをVercelからAWSへ向ける。
       * **ダウンタイムなしで移行可能。**
 
@@ -129,16 +137,16 @@ Vercelの役割（Compute）のみをAWSに移します。DBやAuthはそのま�
 
 コストや要件に応じて、周辺サービスもAWSネイティブに寄せます。
 
-  * **Storage:** R2 → Amazon S3 (R2が安ければそのままでOK)
-  * **DB:** Neon → Amazon Aurora Serverless (レイテンシ改善が必要な場合)
-  * **Auth:** Clerk → (Clerkは優秀なため、無理にCognitoへ移行せず継続利用を推奨)
+  * **Storage:** Convex File Storage を継続（要件が出たら R2/S3 併用）
+  * **DB:** Convex を継続（退出する場合は export/import）
+  * **Auth:** Clerk（無理にCognitoへ移行せず継続利用を推奨）
 
 -----
 
 ### 結論
 
-  * **現在:** **Vercel + Clerk + R2** で開始し、PMFまでの速度を稼ぐ。
-  * **開発:** AWS SDKやORMを使用し、\*\*「標準技術」\*\*で実装する（Vercel独自機能禁止）。
+  * **現在:** **Vercel + Clerk + Convex** で開始し、PMFまでの速度を稼ぐ。
+  * **開発:** Vercel独自機能に依存せず、境界ガードを関数側に集約する。
   * **未来:** 成長に合わせて **AWS App Runner / ECS** へコンテナを移す。
 
 この方針であれば、リスクを最小限に抑えつつ、スタートアップとしての機動力を最大化できます。
@@ -146,8 +154,8 @@ Vercelの役割（Compute）のみをAWSに移します。DBやAuthはそのま�
 :::tip[実装前の検討事項]
 以下の点は実装前に確定する必要があります：
 - Vercelの具体的なプラン選定（Hobby / Pro / Enterprise）
-- Neon/Supabaseの選定と初期設定
-- Cloudflare R2のバケット設計
+- Convexプロジェクトの初期設定（Auth連携 / テナント境界）
+- ファイル保存の方針（Convex / R2併用の判断）
 - AWS移行の具体的なタイミング判断基準
 - コスト監視とアラート設定
 

@@ -7,8 +7,8 @@ hero:
   image:
     file: /favicon.ico
   actions:
-    - text: アーキテクチャを見る
-      link: /architecture/tenant-model
+    - text: 現在のスタックを見る
+      link: /architecture/stack/current
       icon: right-arrow
     - text: インフラ選定を読む
       link: /research/infrastructure-selection
@@ -31,9 +31,9 @@ MobiPitaは、フランチャイズ型ビジネス向けのB2B2Cプラットフ�
 	<Card title="アーキテクチャ" icon="rocket">
 		システムの設計思想とアーキテクチャパターンについて解説します。
 		<ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+			<li><a href="/architecture/stack/current">Current Stack</a> - いま採用している技術の単一の正</li>
+			<li><a href="/architecture/tenancy/request-context">Request Context</a> - テナント境界の一本線</li>
 			<li><a href="/architecture/tenant-model">テナントモデル</a> - RootTenant/Tenant/Locationの関係性</li>
-			<li><a href="/architecture/stripe/stripe-connect">Stripe Connect</a> - 決済システムの設計</li>
-			<li><a href="/architecture/db/database-design">データベース設計</a> - マルチテナントDBの設計パターン</li>
 		</ul>
 	</Card>
 	<Card title="ミーティング記録" icon="list-format">
@@ -54,18 +54,20 @@ MobiPitaは、フランチャイズ型ビジネス向けのB2B2Cプラットフ�
 
 ### アーキテクチャの理解
 
-1. **[テナントモデル](/architecture/tenant-model)** - RootTenant、Tenant、Locationの関係性とパターン
-2. **[Stripe Connect](/architecture/stripe/stripe-connect)** - 決済システムの設計と実装方針
-3. **[データベース設計](/architecture/db/database-design)** - マルチテナントDBの設計パターン
+1. **[Current Stack](/architecture/stack/current)** - 採用中の技術結論（SoT）
+2. **[Request Context](/architecture/tenancy/request-context)** - テナント境界の重要ルール
+3. **[テナントモデル](/architecture/tenant-model)** - RootTenant、Tenant、Locationの関係性
+4. **[Stripe Connect](/architecture/stripe/stripe-connect)** - 決済システムの設計と実装方針
+5. **[データベース設計](/architecture/db/database-design)** - Convex前提の設計パターン
 
 ### 技術スタック
 
 - **フロントエンド**: Next.js
-- **認証**: Clerk / Better Auth
-- **データベース**: PostgreSQL (Neon/Supabase)
-- **ストレージ**: Cloudflare R2 / AWS S3
+- **認証**: Clerk
+- **DB / BaaS**: Convex
+- **ストレージ**: Convex File Storage（暫定）
 - **決済**: Stripe Connect
-- **インフラ**: Vercel → AWS (移行予定)
+- **インフラ**: Vercel（フロント） + Convex（バックエンドBaaS）
 
 ## プロジェクト構成
 
@@ -79,7 +81,7 @@ MobiPitaは、フランチャイズ型ビジネス向けのB2B2Cプラットフ�
   - サブドメインによるマルチテナント構成
 
 :::tip[注意]
-現在の構成は**検討段階**です。実装に進む前に、要件や技術選定が確定する可能性があります。
+現在の構成は**暫定採用**です。詳細は [Current Stack](/architecture/stack/current) を参照してください。
 :::
 
 詳細は[アプリケーション構成](/meetings/app-architecture)を参照してください。

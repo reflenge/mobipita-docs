@@ -69,6 +69,8 @@ export default defineConfig({
                     label: "アーキテクチャ",
                     items: [
                         { label: "アーキテクチャ", link: "/architecture/" },
+                        { label: "Current Stack", link: "/architecture/stack/current" },
+                        { label: "Request Context", link: "/architecture/tenancy/request-context" },
                         { label: "RootTenant / Tenant / Location", link: "/architecture/tenant-model" },
                         {
                             label: "Stripe",
@@ -82,13 +84,27 @@ export default defineConfig({
                             items: [
                                 { label: "データベース設計", link: "/architecture/db/database-design" },
                                 { label: "データベース選定", link: "/architecture/db/database-selection" },
-                                { label: "ORM選定", link: "/architecture/db/orm-selection" },
                             ],
                         },
                         { label: "認証", link: "/architecture/auth/provider-selection" },
                         { label: "ストレージ", link: "/architecture/storage/selection" },
                         { label: "デプロイ", link: "/architecture/deploy/strategy" },
                         { label: "バックエンド", link: "/architecture/backend/selection" },
+                        {
+                            label: "アーカイブ (Postgres)",
+                            items: [
+                                { label: "DB選定（Archive）", link: "/architecture/archive/postgres/database-selection" },
+                                { label: "DB設計（Archive）", link: "/architecture/archive/postgres/database-design" },
+                                { label: "ORM選定（Archive）", link: "/architecture/archive/postgres/orm-selection" },
+                            ],
+                        },
+                        {
+                            label: "ADR",
+                            items: [
+                                { label: "ADR 一覧", link: "/architecture/adr/" },
+                                { label: "ADR-0001: Adopt Clerk + Convex", link: "/architecture/adr/0001-adopt-clerk-convex" },
+                            ],
+                        },
                     ],
                 },
                 {
