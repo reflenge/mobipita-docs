@@ -19,7 +19,7 @@ PostgreSQLを採用する場合、現代のマルチテナント開発のデフ�
 ## データベース候補の比較
 
 ### BaaS として (Convex)
-詳細は[backend](/architecture/backend/section)
+詳細は[backend](/architecture/backend/selection)
 
 ### PostgreSQL (Supabase)
 
