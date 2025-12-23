@@ -21,39 +21,30 @@ $master \to B_1$ と $B_1 \to B_2 \to User$ を分ける。
 
 ```mermaid
 graph TD
-    subgraph "Next.js(Master App)"
-        master[マスター管理画面]
-    end
-    master --api key--> CompanyA[会社A]
-    master --api key--> CompanyB[会社B]
-    subgraph "Next.js(Customer App)"
-        CompanyA --> ShopsA1
-        CompanyA --> ShopsA2
-        CompanyA --> ShopsA3
-        CompanyB --> ShopsB1
-        CompanyB --> ShopsB2
-        CompanyB --> ShopsB3
-        ShopsA1 <--> User1
-        ShopsA2 <--> User1
-        ShopsA3 <--> User1
-        ShopsB1 <--> User2
-        ShopsB2 <--> User2
-        ShopsB3 <--> User2
-
-        subgraph "B_1"
-            CompanyA
-            CompanyB
-        end
-        subgraph "B_2"
-            ShopsA1
-            ShopsA2
-            ShopsA3
-            ShopsB1
-            ShopsB2
-            ShopsB3
-        end
+    Master["Master（マスター管理）"]
+    Master --> RootTenantB["RootTenant（本部B）"]
+    Master --> RootTenantC["RootTenant（本部C）"]
+    RootTenantB --> LocationB1["Location：本部B 直営・高知駅前店"]
+    RootTenantB --> LocationB2["Location：本部B 直営・本社ビル店"]
+    RootTenantB --> TenantX["Tenant：運営者X社"]
+    TenantX --> LocationX1["Location：X社・朝倉店"]
+    TenantX --> LocationX2["Location：X社・南国インター店"]
+    RootTenantB --> TenantY["Tenant：運営者Y社"]
+    TenantY --> LocationY1["Location：Y社・須崎店"]
+    subgraph "Notes"
+        NoteRootTenant["RootTenant：0〜N個のTenant / 0〜N個のLocation（直営店）"]
+        NoteTenant["Tenant：必ず1つのRootTenantに属する / 0〜N個のLocation（0店舗期間も可）"]
+        NoteLocation["Location：RootTenant（直営店）またはTenant（フランチャイズ運営者）に属する"]
     end
 ```
+
+:::note[テナント/店舗の関係]
+- RootTenantは0〜N個のTenantを持てる
+- RootTenantは0〜N個のLocation（直営店）を持てる
+- Tenant（運営者）は必ず1つのRootTenantに属する
+- Tenantは0〜N個のLocationを持てる（0店舗期間（準備中）もあり、1店舗でも複数店舗でもOK）
+- Location（店舗）は必ずRootTenant（直営店）またはTenant（フランチャイズ運営者）のどちらかに属する
+:::
 
 ## Master App
 
