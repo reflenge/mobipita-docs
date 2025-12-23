@@ -72,7 +72,10 @@ RootTenantへのロイヤリティは：
 
    * Tenant（運営者）へ：8,000円
    * RootTenant（本部）へ：1,000円（ロイヤリティ）
+        * ASK: めんどくさい・バグ発生箇所なので辞める
    * プラットフォーム取り分：1,000円（Transferしない分）
+        * ASK: Stripe手数料 + (従量課金部分?)
+        * ASK: ハコモノがどうなっているか?
 
 このときの Stripe 設計：
 
@@ -82,6 +85,7 @@ RootTenantへのロイヤリティは：
   * `destination = tenant_account`
   * `destination = root_tenant_account`
     を2本投げるイメージ
+       * ASK: ロイヤリティを取るか?
 
 **メリット**
 
