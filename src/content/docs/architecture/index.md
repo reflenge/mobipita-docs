@@ -54,6 +54,14 @@ Convex前提のデータ分離と関数ガードを中心に解説します。
 
 ---
 
+### 実装設計メモ（TODO含む）
+
+**ファイル**: [実装設計メモ](/architecture/implementation-notes)
+
+実装に近い粒度の設計項目と、未確定のTODOを整理します。
+
+---
+
 ### 認証
 
 **ファイル**: [認証](/architecture/auth/provider-selection)
