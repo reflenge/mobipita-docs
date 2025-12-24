@@ -70,6 +70,7 @@ export default defineConfig({
                     items: [
                         { label: "アーキテクチャ", link: "/architecture/" },
                         { label: "Current Stack", link: "/architecture/stack/current" },
+                        { label: "サービス費用", link: "/architecture/stack/costs" },
                         { label: "実装設計メモ", link: "/architecture/implementation-notes" },
                         { label: "Request Context", link: "/architecture/tenancy/request-context" },
                         { label: "RootTenant / Tenant / Location", link: "/architecture/tenant-model" },

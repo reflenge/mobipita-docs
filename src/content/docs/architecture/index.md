@@ -9,10 +9,11 @@ description: システムの設計思想とアーキテクチャパターン
 MobiPitaのアーキテクチャを理解するための推奨読書順序：
 
 1. **[Current Stack](/architecture/stack/current)** - 採用中の技術結論（SoT）
-2. **[Request Context](/architecture/tenancy/request-context)** - テナント境界の最重要ルール
-3. **[テナントモデル](/architecture/tenant-model)** - RootTenant / Tenant / Location の関係
-4. **[Stripe Connect](/architecture/stripe/stripe-connect)** - 決済システムの実装方針
-5. **[データベース設計](/architecture/db/database-design)** - Convex 前提の設計指針
+2. **[サービス費用](/architecture/stack/costs)** - スタックの料金観点まとめ
+3. **[Request Context](/architecture/tenancy/request-context)** - テナント境界の最重要ルール
+4. **[テナントモデル](/architecture/tenant-model)** - RootTenant / Tenant / Location の関係
+5. **[Stripe Connect](/architecture/stripe/stripe-connect)** - 決済システムの実装方針
+6. **[データベース設計](/architecture/db/database-design)** - Convex 前提の設計指針
 
 ---
 
@@ -25,6 +26,14 @@ MobiPitaのアーキテクチャを理解するための推奨読書順序：
 - **Payments:** Stripe Connect
 
 詳細は [Current Stack](/architecture/stack/current) を参照。
+
+---
+
+### サービス費用
+
+**ファイル**: [サービス費用](/architecture/stack/costs)
+
+Clerk/Convex/Vercel/Stripe Connect の料金観点と見積りの前提を整理します。
 
 ---
 
