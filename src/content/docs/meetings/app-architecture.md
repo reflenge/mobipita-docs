@@ -4,7 +4,7 @@ description: Master AppとCustomer Appの分離構成について
 
 ---
 
-[LINE ログインサンプル](https://neon-grid-wars.mosunset.com/messages)
+[LINE ログインサンプル](https://neon-grid-wars.mosunset.com/messages?openExternalBrowser=1)
 
 :::tip[現在の結論]
 - Auth: Clerk（Organizations = RootTenant）
