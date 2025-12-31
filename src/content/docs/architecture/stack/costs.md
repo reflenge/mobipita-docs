@@ -44,7 +44,7 @@ description: Clerk/Convex/Vercel/Stripe Connect の料金観点まとめ
 
 ### プランの骨格（“月額0でも開始”）
 
-Convexは **Free（$0）**から開始でき、上位に **Professional $25/月** がある構造。([Convex][4])
+Convexは **Free**（$0）から開始でき、上位に **Professional $25/月** がある構造。([Convex][4])
 
 ### Free/Starterでの主要な無料枠（課金が出やすい項目）
 
