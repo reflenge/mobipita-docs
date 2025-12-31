@@ -66,6 +66,10 @@ export default defineConfig({
                     link: "/",
                 },
                 {
+                    label: "機能定義書",
+                    link: "/functional-specification",
+                },
+                {
                     label: "アーキテクチャ",
                     items: [
                         { label: "アーキテクチャ", link: "/architecture/" },
