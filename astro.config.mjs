@@ -114,6 +114,16 @@ export default defineConfig({
                     ],
                 },
                 {
+                    label: "機能設計",
+                    items: [
+                        { label: "機能設計", link: "/functional-design/" },
+                        { label: "システム全体構成", link: "/functional-design/system-architecture" },
+                        { label: "エンドユーザー（顧客）向け機能", link: "/functional-design/customer-features" },
+                        { label: "店舗オーナー/店舗スタッフ向け機能", link: "/functional-design/store-features" },
+                        { label: "フランチャイズ本部向け機能", link: "/functional-design/headquarters-features" },
+                    ],
+                },
+                {
                     label: "ミーティング",
                     items: [
                         { label: "アプリケーション構成", link: "/meetings/app-architecture" },
