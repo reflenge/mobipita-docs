@@ -116,11 +116,59 @@ export default defineConfig({
                 {
                     label: "機能設計",
                     items: [
-                        { label: "機能設計", link: "/functional-design/" },
-                        { label: "システム全体構成", link: "/functional-design/system-architecture" },
-                        { label: "エンドユーザー（顧客）向け機能", link: "/functional-design/customer-features" },
-                        { label: "店舗オーナー/店舗スタッフ向け機能", link: "/functional-design/store-features" },
-                        { label: "フランチャイズ本部向け機能", link: "/functional-design/headquarters-features" },
+                        { label: "機能設計（概要）", link: "/functional-design/" },
+                        {
+                            label: "システム",
+                            items: [
+                                { label: "システム全体構成（概要）", link: "/functional-design/system-architecture" },
+                                { label: "構成要素", link: "/functional-design/system/components" },
+                                { label: "外部サービス連携", link: "/functional-design/system/external-integrations" },
+                            ],
+                        },
+                        {
+                            label: "顧客",
+                            items: [
+                                { label: "顧客向け（概要）", link: "/functional-design/customer-features" },
+                                { label: "アカウント", link: "/functional-design/customer/account" },
+                                { label: "検索", link: "/functional-design/customer/search" },
+                                { label: "出店詳細", link: "/functional-design/customer/detail" },
+                                { label: "予約", link: "/functional-design/customer/booking" },
+                                { label: "決済", link: "/functional-design/customer/payment" },
+                                { label: "予約確認・変更・キャンセル", link: "/functional-design/customer/manage-booking" },
+                            ],
+                        },
+                        {
+                            label: "店舗",
+                            items: [
+                                { label: "店舗向け（概要）", link: "/functional-design/store-features" },
+                                { label: "店舗アカウント", link: "/functional-design/store/account" },
+                                { label: "出店スケジュール（カレンダー）", link: "/functional-design/store/schedule" },
+                                { label: "テンプレートから作成", link: "/functional-design/store/templates" },
+                                { label: "予約枠・メニュー設定", link: "/functional-design/store/menu-slots" },
+                                { label: "予約一覧・当日運営", link: "/functional-design/store/ops" },
+                                { label: "店舗レポート", link: "/functional-design/store/reports" },
+                            ],
+                        },
+                        {
+                            label: "本部",
+                            items: [
+                                { label: "本部向け（概要）", link: "/functional-design/headquarters-features" },
+                                { label: "加盟店管理", link: "/functional-design/headquarters/franchise-stores" },
+                                { label: "キャンセル/決済ルール", link: "/functional-design/headquarters/policies-payments" },
+                                { label: "公式テンプレート管理", link: "/functional-design/headquarters/templates" },
+                                { label: "本部レポート", link: "/functional-design/headquarters/reports" },
+                            ],
+                        },
+                        {
+                            label: "フロー（横断）",
+                            items: [
+                                { label: "フロー一覧", link: "/functional-design/flows/" },
+                                { label: "予約フロー", link: "/functional-design/flows/reservation-flow" },
+                                { label: "キャンセル・返金", link: "/functional-design/flows/cancel-refund-flow" },
+                                { label: "スケジュール作成", link: "/functional-design/flows/store-schedule-flow" },
+                                { label: "テンプレ配布", link: "/functional-design/flows/template-distribution-flow" },
+                            ],
+                        },
                     ],
                 },
                 {

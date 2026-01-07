@@ -3,6 +3,24 @@ title: システム全体構成
 description: システムの論理構成とアーキテクチャ
 ---
 
+## 詳細ページ
+
+- [構成要素](/functional-design/system/components)
+- [外部サービス連携](/functional-design/system/external-integrations)
+
+---
+
+## 構成イメージ（たたき台）
+
+```mermaid
+flowchart LR
+  FE[フロントエンド] --> APP[アプリケーションサーバ]
+  FE --> NB[Next.js バックエンド]
+  NB --> APP
+  APP --> DB[(データベース)]
+  APP --> EXT[外部サービス]
+```
+
 ## 構成イメージ（論理構成）
 
 1. フロントエンド（Web アプリケーション）
