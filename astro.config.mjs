@@ -14,6 +14,11 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
     site: "https://mobipita-docs.reflenge.workers.dev",
 
+    server: {
+        host: true,
+        port: 4321,
+    },
+
     markdown: {
         remarkPlugins: [remarkMath],
         rehypePlugins: [[rehypeKatex, { strict: true }]],

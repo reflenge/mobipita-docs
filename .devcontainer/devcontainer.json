@@ -1,0 +1,17 @@
+{
+  "name": "mobipita-docs",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "docs",
+  "workspaceFolder": "/workspaces/mobipita-docs",
+  "postCreateCommand": "corepack enable && pnpm install",
+  "forwardPorts": [4321],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "astro-build.astro-vscode",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
+
