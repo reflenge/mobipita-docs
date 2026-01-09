@@ -2,7 +2,7 @@
 FROM node:22.21.1
 
 # 開発に必要なツールを追加
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     vim \
@@ -11,14 +11,18 @@ RUN apt-get update && apt-get install -y \
 # 作業ディレクトリ
 WORKDIR /workspace
 
+# pnpm をグローバルにインストール (packageManager の版に合わせる)
+RUN npm install -g pnpm@10.26.0
+
+# 依存関係をインストール
+COPY package.json ./
+RUN pnpm install
+
 # ソースをコンテナへコピー
 COPY . ./
 
-# pnpm をグローバルにインストール
-RUN npm install -g pnpm
-
-# 依存関係をインストール
-RUN pnpm install
+# Astro のデフォルトポート
+EXPOSE 4321
 
 # 開発サーバーを起動
-CMD [ "pnpm","run", "dev" ]
+CMD [ "pnpm","run","dev","--","--host","0.0.0.0" ]
