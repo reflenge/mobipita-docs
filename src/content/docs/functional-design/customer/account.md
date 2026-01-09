@@ -21,6 +21,8 @@ description: 新規登録/退会、ログイン、プロフィール編集
 
 ## フロー（たたき台）
 
+##　新規登録フロー {#new}
+　
 ```mermaid
 flowchart TD
 
@@ -74,8 +76,44 @@ new_Z1 --> new_C
 new_D2 --> new_C
 new_F --> new_G[登録完了画面表示]
 ```
+## ログイン
 
+```mermaid
+flowchart TD
 
+login_A[ログイン開始] --> login_B{ログイン方法選択}
+
+login_B -->|メール/パスワード| login_C[メールログインへ]
+login_B -->|LINEログイン| login_D[LINEログインへ]
+
+%% --- メールログイン ---
+subgraph メールログイン
+  login_C --> login_E{メールアドレス存在?}
+  login_E -->|なし| login_E_err[エラー:「メールアドレスが見つかりません」] --> login_C
+
+  login_E -->|あり| login_F{パスワード一致?}
+  login_F -->|不一致| login_F_err[エラー:「パスワードが違います」] --> login_C
+
+end
+
+%% --- LINEログイン ---
+subgraph LINEログイン
+  login_D --> login_H[LINE認証画面へ遷移]
+  login_H --> login_I{認証許可?}
+
+  login_I -->|拒否| login_I_err[「ログインが中断されました」]
+  login_I -->|許可| login_J{既存アカウントあり?}
+
+  login_J -->|あり| login_K[アカウント紐づけ]
+  login_J -->|なし| login_L[[新規アカウント作成 <br> 新規登録フローへ]]
+  end
+
+login_I_err --> login_B
+login_K --> login_G
+login_L --> login_G
+login_F -->|一致| login_G[ログイン成功]
+login_G --> login_M[ホーム画面へ遷移]
+```
 
 
 
