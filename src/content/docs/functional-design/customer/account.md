@@ -41,8 +41,7 @@ new_C -->|LINE登録| new_E[LINE登録へ]
 subgraph メール登録
   new_D --> new_A1{記入内容を登録}
   new_A1 -->|登録| new_B1{メールアドレス重複チェック}
-  new_A1 -->|戻る| new_Z1[登録方法へ戻る]
-  
+
 
   new_B1 -->|既に登録済み| new_C1[エラー追加:「このメールは使用されています」] --> new_D1[パスワード条件チェック開始]
   new_B1 -->|未登録| new_D1
@@ -75,8 +74,7 @@ subgraph LINE登録
   new_G2 --> new_H2
   new_H2 --> new_F
 end
-
-new_Z1 --> new_C
+new_A1 -->|戻る| new_C
 new_D2 --> new_C
 new_F --> new_G[登録完了画面表示]
 ```
@@ -86,18 +84,31 @@ new_F --> new_G[登録完了画面表示]
 ```mermaid
 flowchart TD
 
-withdraw_A[アイコンタップ] --> withdraw_B[退会手続きボタン]
-withdraw_B --> withdraw_C{最終確認ダイアログ}
+withdraw_A[アイコン/マイページをタップ] --> withdraw_B{ログイン済み?}
 
-withdraw_C -->|キャンセル| withdraw_A
+%% ログイン判定の分岐
+withdraw_B -->|NO| withdraw_L_redirect[[ログイン画面へリダイレクト<br>ログインフロー<br>login_Aへ]]
+withdraw_B -->|YES| withdraw_C[プロフィール/設定画面表示]
 
-subgraph 退会処理 
-  withdraw_C -->|退会を確定| withdraw_D[Clerk: ユーザー削除実行]
-  withdraw_D --> withdraw_E[Clerk Webhook: user.deleted 発火]
-  withdraw_E --> withdraw_F[Convex: ユーザー関連データのクリーンアップ]
+%% 退会手続きの開始
+withdraw_C --> withdraw_D[退会手続きボタンをタップ]
+withdraw_D --> withdraw_E{最終確認ダイアログ}
+
+withdraw_E -->|キャンセル| withdraw_C
+
+%% ここで一度改行を入れ、定義を明確にします
+subgraph 退会処理
+    withdraw_F[Clerk: ユーザー削除実行]
+    withdraw_G[Clerk Webhook: user.deleted 発火]
+    withdraw_H[Convex: ユーザー関連データのクリーンアップ]
+    
+    withdraw_F --> withdraw_G
+    withdraw_G --> withdraw_H
 end
 
-withdraw_F --> withdraw_G[セッション破棄 / LPへリダイレクト]
+%% subgraph外からの接続
+withdraw_E -->|退会を確定| withdraw_F
+withdraw_H --> withdraw_I[セッション破棄 / LPへリダイレクト]
 ```
 
 ## ログイン
@@ -142,11 +153,88 @@ login_G --> login_M[ホーム画面へ遷移]
 ## ログアウト
 ```mermaid
 flowchart TD
+logout_A[アイコンタップ] --> logout_B{ログイン済み?}
 
-logout_A[ログアウト操作] --> logout_B{確認ダイアログ表示?}
+%% ログイン判定の分岐
+logout_B -->|NO| logout_L_redirect[[ログイン画面へリダイレクト<br>ログインフロー<br>login_Aへ]]
+logout_B -->|YES| logout_B1[ログアウト]
+logout_B1 -->logout_C{確認ダイアログ表示?}
 
-logout_B -->|キャンセル| logout_C[ホーム画面へ戻る]
-logout_B -->|ログアウト| logout_D[セッション削除]
+%% --- ログアウト実行フロー ---
+logout_C -->|キャンセル| logout_D[ホーム画面へ戻る]
+logout_C -->|ログアウト| logout_E[Clerk: セッション削除/サインアウト]
 
-logout_D --> logout_E[[ログイン画面へ遷移<br>ログインフロー<br>login_Aへ]]
+logout_E --> logout_F[[ログイン画面へ遷移<br>ログインフロー<br>login_Aへ]]
+```
+## プロフィール編集
+
+```mermaid
+flowchart TD
+
+edit_A[アイコン/マイページをタップ] --> edit_B{ログイン済み?}
+
+%% ログイン判定の分岐
+edit_B -->|NO| edit_L_redirect[[ログイン画面へリダイレクト<br>ログインフロー<br>login_Aへ]]
+edit_B -->|YES| edit_C[プロフィール画面表示]
+
+edit_C --> edit_D{編集項目を選択}
+
+edit_D -->|アイコン変更| edit_H[アイコン変更フローへ]
+edit_D -->|氏名編集| edit_E[氏名変更フローへ]
+edit_D -->|メール変更| edit_F[メール変更フローへ]
+edit_D -->|パスワード変更| edit_G[パスワード変更フローへ]
+
+%% --- アイコン変更 (Clerk) ---
+subgraph アイコン変更
+  edit_H --> edit_H1[画像ファイルを選択]
+  edit_H1 --> edit_H2[プレビュー・切り抜き]
+  edit_H2 --> edit_H3{保存ボタン押下}
+  edit_H3 --> edit_H4[Clerk: 画像アップロード実行]
+  edit_H4 --> edit_H5[Clerk Webhook: user.updated 受信]
+  edit_H5 --> edit_H6[Convex: imageURL同期完了]
+end
+
+%% --- 氏名編集 ---
+subgraph 氏名編集
+  edit_E --> edit_E1[新しい氏名を入力]
+  edit_E1 --> edit_E2{保存ボタン押下}
+  edit_E2 --> edit_E3[Convex: userテーブル更新]
+  edit_E3 --> edit_E4[完了通知を表示]
+end
+
+%% --- メールアドレス編集 (Clerk) ---
+subgraph メールアドレス編集
+  edit_F --> edit_F1[新しいメールを入力]
+  edit_F1 --> edit_F2[Clerk: 認証コード送信]
+  edit_F2 --> edit_F3{コード入力一致?}
+  edit_F3 -->|不一致| edit_F4[エラー: 認証コードが違います] --> edit_F2
+  edit_F3 -->|一致| edit_F5[Clerk: メールアドレス更新]
+  edit_F5 --> edit_F6[Clerk Webhook: user.updated 受信]
+  edit_F6 --> edit_F7[Convex: DB同期完了]
+end
+
+%% --- パスワード変更 (Clerk) ---
+subgraph パスワード変更
+  edit_G --> edit_G1[現在のパスワード入力]
+  edit_G1 --> edit_G2{パスワード一致?}
+  edit_G2 -->|NG| edit_G3[エラー: 現在のパスワードが違います] --> edit_G1
+  edit_G2 -->|OK| edit_G4[新しいパスワードを入力/再入力]
+  edit_G4 --> edit_G5[パスワード条件チェック]
+%% --- パスワードチェック ---  
+  edit_G5 --> edit_G6{8文字以上?}
+  edit_G6 -->|OK| edit_G7{数字を含む?}
+  edit_G6 -->|NG| edit_G_err1[エラー: 8文字以上必要] --> edit_G7
+
+  edit_G7 -->|OK| edit_G_check_end
+  edit_G7 -->|NG| edit_G_err2[エラー: 数字が必要] --> edit_G_check_end[チェック終了]
+
+  edit_G_check_end --> edit_G_judge{エラーがある?}
+  edit_G_judge -->|YES| edit_G_show_err[エラー内容表示] --> edit_G4
+  edit_G_judge -->|NO| edit_G_update[Clerk: パスワード更新]
+end
+
+edit_H6 --> edit_C
+edit_E4 --> edit_C
+edit_F7 --> edit_C
+edit_G_update --> edit_C
 ```
