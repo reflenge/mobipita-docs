@@ -1,17 +1,24 @@
 {
-  "name": "mobipita-docs",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "docs",
-  "workspaceFolder": "/workspaces/mobipita-docs",
-  "postCreateCommand": "corepack enable && pnpm install",
-  "forwardPorts": [4321],
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "astro-build.astro-vscode",
-        "esbenp.prettier-vscode"
-      ]
-    }
-  }
-}
+    // Dev Container の表示名
+    "name": "mobipita-docs",
+    // Dockerfile を使ってイメージをビルド
+    "build": {
+        "dockerfile": "../Dockerfile"
+    },
+    // コンテナ内のワークスペース
+    "workspaceFolder": "/workspace",
+    // Windows 側の作業フォルダを /workspace に bind mount する
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
 
+    "customizations": {
+        "vscode": {
+            // 事前に入れる VS Code 拡張
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "openai.chatgpt",
+                "mhutchie.git-graph"
+            ]
+        }
+    }
+}
