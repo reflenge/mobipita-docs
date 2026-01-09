@@ -14,14 +14,18 @@ description: 新規登録/退会、ログイン、プロフィール編集
 - プロフィール編集（ログイン必須）
 
 
-##  疑問点
-- LINE上でも利用規約が必要か
-- パスワードの生成条件はどうするか
+##  確認事項
+- 新規登録
+  - LINE上でも利用規約が必要か
+  - パスワードの生成条件はどうするか
+- 退会
+  - 退会のフローでは技術スタックの情報も含めて書いているがどちらの書き方が好ましいか
+  - プロフィールのアイコンをタップして、退会とプロフィール編集のボタンを表示させる形でよいか
 ---
 
 ## フロー（たたき台）
 
-##　新規登録フロー {#new}
+## 新規登録フロー 
 　
 ```mermaid
 flowchart TD
@@ -76,6 +80,26 @@ new_Z1 --> new_C
 new_D2 --> new_C
 new_F --> new_G[登録完了画面表示]
 ```
+
+## 退会
+
+```mermaid
+flowchart TD
+
+withdraw_A[アイコンタップ] --> withdraw_B[退会手続きボタン]
+withdraw_B --> withdraw_C{最終確認ダイアログ}
+
+withdraw_C -->|キャンセル| withdraw_A
+
+subgraph 退会処理 
+  withdraw_C -->|退会を確定| withdraw_D[Clerk: ユーザー削除実行]
+  withdraw_D --> withdraw_E[Clerk Webhook: user.deleted 発火]
+  withdraw_E --> withdraw_F[Convex: ユーザー関連データのクリーンアップ]
+end
+
+withdraw_F --> withdraw_G[セッション破棄 / LPへリダイレクト]
+```
+
 ## ログイン
 
 ```mermaid
@@ -105,7 +129,7 @@ subgraph LINEログイン
   login_I -->|許可| login_J{既存アカウントあり?}
 
   login_J -->|あり| login_K[アカウント紐づけ]
-  login_J -->|なし| login_L[[新規アカウント作成 <br> 新規登録フローへ]]
+  login_J -->|なし| login_L[[新規アカウント作成 <br> 新規登録フロー<br>new_Eへ]]
   end
 
 login_I_err --> login_B
@@ -115,5 +139,14 @@ login_F -->|一致| login_G[ログイン成功]
 login_G --> login_M[ホーム画面へ遷移]
 ```
 
+## ログアウト
+```mermaid
+flowchart TD
 
+logout_A[ログアウト操作] --> logout_B{確認ダイアログ表示?}
 
+logout_B -->|キャンセル| logout_C[ホーム画面へ戻る]
+logout_B -->|ログアウト| logout_D[セッション削除]
+
+logout_D --> logout_E[[ログイン画面へ遷移<br>ログインフロー<br>login_Aへ]]
+```
