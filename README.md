@@ -75,3 +75,15 @@ docker volume rm mobipita-node-modules mobipita-pnpm-store mobipita-astro mobipi
 ```
 
 詳細は各ドキュメントページを参照してください。
+
+## 本
+
+### 1
+第1章 すべてさらっと
+題2章 2.2 2.3 2.4
+第3章 3.2 3.3
+### 2
+第6章 6.4
+第7章 すべてさらっと
+第8章 すべてさらっと
+第9章～第13章 すべて詳しめに この章が特に実際にやる工程になる
