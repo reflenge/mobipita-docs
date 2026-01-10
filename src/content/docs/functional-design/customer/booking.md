@@ -63,8 +63,7 @@ res_I --> res_I1
 res_J[予約内容の最終確認]
 
 res_K[[クレジットカード決済<br>payment.mdの<br>pay_startへ]]
-res_L[予約完了通知送信]
-res_M[完了画面表示]
+
 
 res_H & res_I1 --> res_J
 res_J -->|確定| res_K[[クレジットカード決済<br>payment.mdの<br>pay_startへ]]
