@@ -15,7 +15,9 @@ WORKDIR /workspace
 RUN npm install -g pnpm@10.28.0
 
 # ソースをコンテナへコピー
-COPY . ./
+# 本番環境のみ
+# 開発環境ではボリュームマウントを使用するためコメントアウト
+# COPY . ./
 
 # Astro のデフォルトポート
 EXPOSE 4321
