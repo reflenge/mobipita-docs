@@ -44,4 +44,34 @@ pnpm build
 pnpm preview
 ```
 
+## Docker コマンド集
+
+```bash
+# イメージをビルド
+docker build -t mobipita-docs .
+
+# 開発サーバーを起動 (Windows PowerShell)
+docker run --rm -it -p 4321:4321 `
+  -v ${PWD}:/workspace `
+  -v mobipita-node-modules:/workspace/node_modules `
+  -v mobipita-pnpm-store:/workspace/.pnpm-store `
+  -v mobipita-astro:/workspace/.astro `
+  -v mobipita-dist:/workspace/dist `
+  -e PNPM_STORE_PATH=/workspace/.pnpm-store `
+  mobipita-docs
+
+# コンテナ内でシェルを開く
+docker run --rm -it `
+  -v ${PWD}:/workspace `
+  -v mobipita-node-modules:/workspace/node_modules `
+  -v mobipita-pnpm-store:/workspace/.pnpm-store `
+  -v mobipita-astro:/workspace/.astro `
+  -v mobipita-dist:/workspace/dist `
+  -e PNPM_STORE_PATH=/workspace/.pnpm-store `
+  mobipita-docs bash
+
+# ボリュームを掃除
+docker volume rm mobipita-node-modules mobipita-pnpm-store mobipita-astro mobipita-dist
+```
+
 詳細は各ドキュメントページを参照してください。
