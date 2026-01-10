@@ -49,7 +49,7 @@ end
 action_check -->|内容を変更する| edit_init[[現在の内容をStateに保持]]
 
 subgraph edit_subroutine [修正プロセス]
-    edit_init --> booking_logic[[booking.md: プラン選択〜空き判定]]
+    edit_init --> booking_logic[[予約処理<br>booking.mdの<br>res_Aへ]]
     
     %% 修正特有のバリデーション
     booking_logic --> edit_verify{修正内容の最終確認}
