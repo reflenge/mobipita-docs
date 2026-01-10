@@ -1,0 +1,23 @@
+services:
+  docs:
+    image: node:22.21.1-bookworm
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - mobipita-node-modules:/workspace/node_modules
+      - mobipita-pnpm-store:/workspace/.pnpm-store
+      - mobipita-astro:/workspace/.astro
+      - mobipita-dist:/workspace/dist
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "100"
+      PNPM_STORE_PATH: /workspace/.pnpm-store
+    command: sh -c "corepack enable && pnpm install && pnpm run dev -- --host 0.0.0.0"
+    ports:
+      - "4321:4321"
+
+volumes:
+  mobipita-node-modules:
+  mobipita-pnpm-store:
+  mobipita-astro:
+  mobipita-dist:

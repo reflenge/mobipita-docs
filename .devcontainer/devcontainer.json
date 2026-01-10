@@ -16,7 +16,11 @@
     "postCreateCommand": "pnpm install",
     // 起動時に開発サーバーを立ち上げる
     "postStartCommand": "pnpm run dev -- --host 0.0.0.0",
-    "containerEnv": {},
+    "containerEnv": {
+        "CHOKIDAR_USEPOLLING": "true",
+        "CHOKIDAR_INTERVAL": "100",
+        "PNPM_STORE_PATH": "/workspace/.pnpm-store"
+    },
 
     "customizations": {
         "vscode": {
