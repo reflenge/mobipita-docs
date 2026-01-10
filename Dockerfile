@@ -1,5 +1,5 @@
 # Node 22 系のベースイメージ
-FROM node:22.21.1
+FROM node:22.21.1-bookworm
 
 # 開発に必要なツールを追加
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -12,11 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /workspace
 
 # pnpm をグローバルにインストール (packageManager の版に合わせる)
-RUN npm install -g pnpm@10.26.0
-
-# 依存関係をインストール
-COPY package.json ./
-RUN pnpm install
+RUN npm install -g pnpm@10.28.0
 
 # ソースをコンテナへコピー
 COPY . ./

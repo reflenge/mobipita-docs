@@ -3,7 +3,8 @@
     "name": "mobipita-docs",
     // Dockerfile を使ってイメージをビルド
     "build": {
-        "dockerfile": "../Dockerfile"
+        "dockerfile": "../Dockerfile",
+        "context": ".."
     },
     // コンテナ内のワークスペース
     "workspaceFolder": "/workspace",
@@ -13,6 +14,9 @@
     "overrideCommand": true,
     // bind mount で node_modules が隠れるため、作成時に依存関係を入れる
     "postCreateCommand": "pnpm install",
+    // 起動時に開発サーバーを立ち上げる
+    "postStartCommand": "pnpm run dev -- --host 0.0.0.0",
+    "containerEnv": {},
 
     "customizations": {
         "vscode": {

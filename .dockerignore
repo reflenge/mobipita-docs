@@ -1,7 +1,8 @@
 node_modules
+.pnpm-store
 .git
 dist
+.astro
 .next
 .venv
 *.log
-
