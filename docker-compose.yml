@@ -9,8 +9,6 @@ services:
       - mobipita-astro:/workspace/.astro
       - mobipita-dist:/workspace/dist
     environment:
-      CHOKIDAR_USEPOLLING: "true"
-      CHOKIDAR_INTERVAL: "100"
       PNPM_STORE_PATH: /workspace/.pnpm-store
     command: sh -c "corepack enable && pnpm install && pnpm run dev -- --host 0.0.0.0"
     ports:

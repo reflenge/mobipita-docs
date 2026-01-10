@@ -11,7 +11,7 @@ import rehypeKatex from "rehype-katex";
 import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     site: "https://mobipita-docs.reflenge.workers.dev",
 
     server: {
@@ -19,7 +19,7 @@ export default defineConfig({
         port: 4321,
         watch: {
             usePolling: true,
-            interval: 100,
+            interval: 500,
             ignored: [
                 "**/.git/**",
                 "**/node_modules/**",
@@ -204,5 +204,5 @@ export default defineConfig({
         sitemap(),
     ],
 
-    adapter: cloudflare(),
-});
+    adapter: command === "dev" ? undefined : cloudflare(),
+}));
